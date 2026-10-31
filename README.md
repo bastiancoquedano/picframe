@@ -5,8 +5,10 @@ deportivas mediante detección local de personas y recortes conservadores.
 
 ## Estado
 
-Fase 1: bootstrap y constitución. Todavía no hay un motor de recorte ni una interfaz ejecutable.
-La especificación funcional y la planificación requieren aprobación del propietario antes de comenzar.
+Fase 1 completada. El propietario aprobó avanzar el 2026-10-31.
+Primera especificación redactada: [reencuadre CLI](specs/001-reencuadre-cli/spec.md),
+pendiente de clarificar política de fotografías inciertas y destino de distribución.
+Todavía no hay motor de recorte ni interfaz ejecutable; no se ha iniciado implementación.
 
 ## Principios
 
@@ -44,8 +46,9 @@ Inicializado con Specify CLI 1.0.1, integración `codex` y scripts Bash.
 Las habilidades oficiales están en `.agents/skills/` y los artefactos compartidos en `.specify/`.
 
 Secuencia: constitución → especificación → clarificación → plan → tareas → implementación.
-Para la siguiente etapa, después de aprobación, usar `$speckit-specify` sobre el primer
-incremento CLI. No ejecutar todavía `$speckit-plan` ni `$speckit-implement`.
+Se aplicó `$speckit-specify` al primer incremento CLI tras la aprobación.
+Resolver las clarificaciones y revisar su checklist antes de `$speckit-plan`.
+No ejecutar todavía `$speckit-implement`.
 
 ## Estructura inicial
 
