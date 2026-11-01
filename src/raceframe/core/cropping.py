@@ -149,7 +149,13 @@ def calculate_focal_crop(width, height, subject, config, focal_mm=None):
         if xmin > xmax or ymin > ymax:
             continue
         x = _nearest(subject.center[0] - w / 2, xmin, xmax)
-        y = _nearest(subject.center[1] - h / 2, ymin, ymax)
+        target_y = (
+            subject.y1 - config.head_fraction * h
+            if config.composition_priority == "headroom"
+            else subject.center[1] - h / 2
+        )
+        y = _nearest(target_y, ymin, ymax)
+        head_error = abs(subject.y1 - y - config.head_fraction * h)
         occupancy = subject.height / h
         key = (
             abs(occupancy - config.target_occupancy),
@@ -158,6 +164,8 @@ def calculate_focal_crop(width, height, subject, config, focal_mm=None):
             x,
             y,
         )
+        if config.composition_priority == "headroom":
+            key = (0 if head_error <= 1 else 1, 0 if head_error <= 1 else head_error / h, *key)
         if best_key is None or key < best_key:
             best_key = key
             best = Box(x, y, x + w, y + h)
@@ -172,7 +180,13 @@ def calculate_focal_crop(width, height, subject, config, focal_mm=None):
             effective_aspect="original",
         )
     notes = ["focal_subject_priority"]
-    if subject.height / best.height < config.target_occupancy - 0.05:
+    if config.composition_priority == "headroom":
+        notes.append("head_upper_third_priority")
+        if abs(subject.y1 - best.y1 - config.head_fraction * best.height) > 1:
+            notes.append("headroom_limited_by_safety_or_bounds")
+        if subject.height / best.height < config.target_occupancy - 0.05:
+            notes.append("occupancy_yielded_to_headroom")
+    elif subject.height / best.height < config.target_occupancy - 0.05:
         notes.append("occupancy_limited_by_resolution_or_safety")
     return Composition(
         status=CompositionStatus.UNCHANGED

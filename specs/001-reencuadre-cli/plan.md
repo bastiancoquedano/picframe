@@ -201,3 +201,12 @@ al objetivo de ocupación, luego desplazamiento del sujeto. Evitar recortar más
 ya tiene protagonista grande. Para angular/focal desconocida reutilizar motor de contexto.
 El manifiesto añade focal, ocupación original/final y configuración efectiva. Esta política
 prima sobre la retención de área de los modos; --framing-policy context recupera el criterio previo.
+
+### Prioridad de tercios — 2026-11-01
+
+Añadir composition_priority=headroom|occupancy (default headroom) y head_fraction=1/3.
+Para cada tamaño, situar y alrededor de subject.y1-head_fraction*height, limitado por cuerpo,
+márgenes y lienzo. Considerar cumplido el tercio con error <=1 píxel; entre soluciones que lo
+cumplen preferir la más cercana a la ocupación anterior. Si no hay cumplimiento, minimizar
+error relativo y registrar limitación. Esta regla solo se aplica en la rama de teleobjetivo;
+focal menor/ausente conserva el motor de contexto. Registrar referencia estimada y posición final.

@@ -233,7 +233,7 @@ No introducir GUI, RAW, pose, dorsales ni reanudación durante estas tareas.
 ## Notes
 
 44 tareas: setup 3, base 7, US1 12, US2 4, US3 8, US4 4, transversal 6.
-No hay hooks before_tasks/after_tasks configurados. Implementación técnica completada: 45/47 tareas, incluido el refinamiento focal/metadatos.
+No hay hooks before_tasks/after_tasks configurados. Implementación técnica completada: 47/49 tareas, incluido el refinamiento focal/metadatos.
 T042/T043 permanecen pendientes por indicación del propietario: evaluación y evento real
 se harán con su ayuda. No se considera el MVP validado fotográficamente.
 Las limitaciones de acceso a fotos reales se comunicarán al alcanzar T042/T043, sin fabricar resultados.
@@ -250,3 +250,8 @@ La convergencia y aceptación completas requieren esa evidencia; mantenerla pend
 - [X] T045 Preservar y verificar EXIF/MakerNotes y bloques APP/COM en src/raceframe/export/metadata.py y tests/integration/test_export.py, sin publicación ante pérdida, conforme a FR-028.
 - [X] T046 Implementar focal real, ocupación y límite de resolución en src/raceframe/core/cropping.py, src/raceframe/config.py y tests/unit/test_focal_framing.py, conforme a FR-026/FR-027.
 - [X] T047 Documentar preparación ExifTool, actualizar contrato/CLI y reprocesar la muestra a un trabajo nuevo con tiempos y comparación de metadatos, sin tocar originales; README.md y scripts/prepare_metadata_tool.py.
+
+## Phase 9: Espacio superior por tercios
+
+- [X] T048 Probar e implementar prioridad headroom sobre ocupación en src/raceframe/core/cropping.py, configuración y CLI; cubrir bordes inviables y protección en tests/unit/test_headroom.py según FR-029.
+- [X] T049 Reprocesar la muestra a un trabajo nuevo, verificar metadatos, registrar posición de referencia y tiempos, actualizar documentación y subir cambios sin datos privados.

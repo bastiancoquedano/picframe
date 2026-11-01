@@ -6,7 +6,7 @@ exporta a una carpeta independiente, sin modificar originales.
 
 ## Estado actual
 
-La implementación técnica del CLI está terminada: **45/47 tareas completadas**.
+La implementación técnica del CLI está terminada: **47/49 tareas completadas**.
 Las dos tareas pendientes son evaluación con 30–50 fotografías reales y medición de un evento
 completo; el propietario las realizará con ayuda del agente. Todavía no se declara el MVP
 fotográficamente validado. La interfaz gráfica pertenece a la siguiente fase del proyecto.
@@ -99,7 +99,7 @@ No se incluye una licencia propia de distribución ni fotografías/modelos/entor
 
 ## Composición por focal y metadatos estrictos
 
-La política predeterminada usa focal EXIF real: >=70 mm busca 75 % de altura del sujeto;
+La política predeterminada usa focal EXIF real: >=70 mm prioriza cabeza en el tercio superior;
 <70 mm o sin focal conserva contexto. No se aplica equivalencia de formato completo.
 Se mantiene cuerpo visible, proporción y lado largo mínimo inicial de 3000 px sin ampliar.
 Si el objetivo no es factible, se conserva seguridad/resolución y se registra la limitación.
@@ -118,3 +118,14 @@ La implementación prioriza esa conservación, incluso manteniendo relleno para 
 estructura: el archivo recortado puede pesar parecido al original aunque tenga menos píxeles.
 Si la estructura no puede verificarse, no publica el recorte. Los valores de captura se
 conservan; las posiciones internas de datos y los campos derivados se actualizan cuando procede.
+
+### Prioridad de espacio superior
+
+El propietario eligió priorizar la referencia de cabeza en el tercio superior sobre la ocupación
+70–80 %. Esto se aplica en la rama >=70 mm. Si no es factible, aproxima el objetivo sin cortar
+el cuerpo ni superar límites; se registra headroom_limited_by_safety_or_bounds.
+La referencia actual es el borde superior de detección: no es una localización anatómica garantizada.
+
+--composition-priority headroom|occupancy selecciona la prioridad (headroom predeterminado).
+--head-fraction configura la posición desde arriba (default 1/3; JSON también admite ambos campos).
+La alternativa occupancy mantiene la regla anterior del 75 %. Focal menor/ausente conserva contexto.

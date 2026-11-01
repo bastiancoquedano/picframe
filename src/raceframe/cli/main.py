@@ -41,6 +41,8 @@ def main(argv=None, *, detector_factory=None):
     process.add_argument("--focal-threshold", type=float)
     process.add_argument("--target-occupancy", type=float)
     process.add_argument("--min-long-edge", type=int)
+    process.add_argument("--composition-priority", choices=("headroom", "occupancy"))
+    process.add_argument("--head-fraction", type=float)
     report = sub.add_parser("report", help="Consultar o recuperar un trabajo local")
     report.add_argument("directory", type=Path)
     report.add_argument("--recover", action="store_true")
@@ -76,6 +78,8 @@ def main(argv=None, *, detector_factory=None):
                 "focal_threshold",
                 "target_occupancy",
                 "min_long_edge",
+                "composition_priority",
+                "head_fraction",
             )
             if getattr(args, name) is not None
         }

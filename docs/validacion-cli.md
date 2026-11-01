@@ -1,13 +1,13 @@
 # Validación técnica — 2026-11-01
 
-Implementación CLI completa, sin declarar validación fotográfica del MVP. 45/47 tareas;
+Implementación CLI completa, sin declarar validación fotográfica del MVP. 47/49 tareas;
 T042/T043 se reservan al propietario por su indicación del 2026-11-01.
 
 ## Evidencia
 
 - Las pruebas nuevas de exportación, procesamiento, selección, diario y modos se ejecutaron
   antes de sus implementaciones y reprodujeron los fallos esperados; luego pasaron.
-- Suite completa con pesos locales: 127 pruebas aprobadas, incluidas CPU real y offline.
+- Suite completa con pesos locales: 130 pruebas aprobadas, incluidas CPU real y offline.
 - La prueba offline lanza un proceso nuevo bajo sandbox-exec con deny network*, y además
   intercepta sockets/DNS: import, inferencia y exportación de un JPEG válido, junto a uno
   dañado, sin intentos de red. El código 1 por el archivo dañado es el resultado esperado.
@@ -89,3 +89,11 @@ La muestra privada de 10 fotos se reprocesó a un trabajo nuevo: 10 exportadas, 
 4 recortes verificados, 1 sin cambios y 5 copias para revisión por ambigüedad. Los originales
 conservaron sus hashes. Los datos y tiempos por archivo quedan solo en la carpeta privada.
 Este resultado no sustituye la valoración estética ni la muestra mayor de T042/T043.
+
+## Prioridad de tercios
+
+Se documentó la elección explícita A y se descartó la respuesta anterior accidental.
+Pruebas: tercio factible con cuerpo protegido, tercio inviable con conservación y advertencia,
+angular sin aplicación de esta regla y prioridad anterior occupancy accesible por CLI.
+La muestra local se reprocesó a un trabajo nuevo con metadatos verificados y originales intactos.
+La selección sigue siendo una aproximación; esta entrega no incorpora pose ni detección anatómica.

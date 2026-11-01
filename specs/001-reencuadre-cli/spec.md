@@ -299,3 +299,15 @@ aproximado del 70–80 % de altura con límite de resolución. Después solicita
 Aceptación: 69,9 mm usa contexto; 70 mm activa protagonismo; focal ausente conserva contexto.
 Un sujeto pequeño puede acercarse aunque ya esté centrado. Ningún límite de resolución se
 cumple inventando píxeles. MakerNotes y bloques desconocidos permanecen presentes; no basta advertir pérdida.
+
+## Prioridad de espacio superior aceptada — 2026-11-01
+
+La respuesta accidental que priorizaba el 70–80 % fue descartada. El propietario eligió A:
+priorizar la cabeza en el tercio superior, aunque el sujeto ocupe menos altura.
+
+- **FR-029**: En la política por focal >=70 mm, colocar la referencia superior del sujeto
+  aproximadamente a 1/3 de la altura del recorte. Seguridad, proporción y resolución prevalecen;
+  este objetivo de composición tiene prioridad sobre la ocupación del 75 %.
+- La referencia actual es el borde superior de la detección, aproximación a la cabeza, sin poses.
+- Si el tercio no es factible, aproximarse sin cortar al sujeto ni ampliar píxeles y registrar el límite.
+- Conservar la opción de prioridad por ocupación para comparar resultados.

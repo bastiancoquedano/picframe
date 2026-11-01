@@ -14,7 +14,7 @@
 - No implementar motor, interfaz ni funcionalidades antes de completar las etapas aprobadas.
 - La idea fuente está en `docs/idea-original.md`; conservarla como referencia histórica.
 - CLI implementado: detección local, selección, modos, exportación, diario, cancelación y reportes.
-- Progreso: 45/47 tareas; T042/T043 pendientes de fotos y evaluación del propietario, reservadas por él.
+- Progreso: 47/49 tareas; T042/T043 pendientes de fotos y evaluación del propietario, reservadas por él.
 - No afirmar validación fotográfica ni rendimiento real hasta completar esos pasos.
 - Entorno completo: uv sync --locked --extra detector. Usar --no-sync al ejecutar para conservar el extra.
 - Pesos en models/ excluidos de Git; configuración de desarrollo en .runtime/ también excluida.
@@ -23,5 +23,6 @@
 - Registrar resultados verificables. No presentar un entorno configurado como un MVP validado.
 
 - Metadatos obligatorios: usar ExifTool y verificar antes de publicar recortes; no degradar a advertencia.
-- Política por focal real >=70 mm: ocupación objetivo 0,75 y lado largo mínimo 3000 px, configurables.
+- Focal real >=70 mm: priorizar referencia de cabeza en tercio superior; ocupación 0,75 secundaria.
+- composition_priority=headroom por defecto; occupancy conserva la alternativa previa. Lado largo mínimo 3000 px.
 - Con focal menor o ausente, conservar contexto. Las fotos ambiguas siguen copiándose completas.

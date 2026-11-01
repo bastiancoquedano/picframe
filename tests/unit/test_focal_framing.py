@@ -5,7 +5,7 @@ from raceframe.core.models import Box
 
 def test_telephoto_subject_priority_and_resolution():
     box = Box(1400, 1800, 2300, 4000)
-    result = calculate_focal_crop(4000, 6000, box, Config(), 189)
+    result = calculate_focal_crop(4000, 6000, box, Config(composition_priority="occupancy"), 189)
     assert result.status == "cropped"
     assert 0.70 <= box.height / result.crop.height <= 0.80
     assert max(result.crop.width, result.crop.height) >= 3000
@@ -24,6 +24,6 @@ def test_wide_missing_and_threshold():
 
 def test_resolution_prevents_overcropping():
     box = Box(1400, 1800, 1600, 2400)
-    result = calculate_focal_crop(4000, 6000, box, Config(), 100)
+    result = calculate_focal_crop(4000, 6000, box, Config(composition_priority="occupancy"), 100)
     assert max(result.crop.width, result.crop.height) >= 3000
     assert "occupancy_limited_by_resolution_or_safety" in result.reasons

@@ -28,6 +28,8 @@ class Config:
     framing_policy: str = "focal"
     focal_threshold: float = 70.0
     target_occupancy: float = 0.75
+    composition_priority: str = "headroom"
+    head_fraction: float = 1 / 3
     min_long_edge: int = 3000
     margin: float = 0.08
     quality: int = 95
@@ -52,6 +54,10 @@ class Config:
         ):
             if getattr(self, name) not in choices:
                 raise ValueError(f"{name} no válido")
+        if self.composition_priority not in ("headroom", "occupancy"):
+            raise ValueError("Prioridad de composición inválida")
+        if not _number(self.head_fraction, 0.1, 0.5):
+            raise ValueError("La posición de cabeza debe estar entre 0,1 y 0,5")
         if self.framing_policy not in ("focal", "context"):
             raise ValueError("Política de encuadre inválida")
         if not _number(self.focal_threshold, 1, 2000) or not _number(

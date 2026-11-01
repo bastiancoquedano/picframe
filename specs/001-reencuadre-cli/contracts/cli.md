@@ -48,3 +48,7 @@ Refinamiento focal: --framing-policy focal|context, --focal-threshold FLOAT,
 --target-occupancy FLOAT y --min-long-edge INT. Defaults focal, 70, 0.75 y 3000.
 Estos valores también se admiten en JSON. La focal es FocalLength real (no equivalente 35 mm).
 ExifTool es prerrequisito de preparación; cualquier pérdida de metadatos bloquea el recorte.
+
+Prioridad aceptada: --composition-priority headroom|occupancy, default headroom;
+--head-fraction FLOAT, default 1/3. Se admite JSON. En teleobjetivo, headroom prevalece sobre
+ocupación; seguridad y resolución son restricciones duras. Fuera de teleobjetivo no se aplica.

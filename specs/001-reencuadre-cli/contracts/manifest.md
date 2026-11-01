@@ -35,3 +35,6 @@ fuera de la versión del trabajo sin comprobar schema_version.
 El campo source añade focal_length_mm y subject_height_fraction_original/output (nullable).
 Config registra la política por focal y límites. metadata_verified señala comparación
 satisfactoria antes de publicar; no se emite una salida recortada con advertencias de pérdida.
+
+source.head_reference=detection_top identifica la aproximación usada; estimated_head_fraction_output
+registra la posición desde el borde superior. Config conserva composition_priority y head_fraction.

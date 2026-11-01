@@ -84,6 +84,10 @@ def analyze_item(root, item, row, detector, config, destination, on_prepared=Non
         row["source"]["subject_height_fraction_output"] = (
             None if subject is None else subject.height / comp.crop.height
         )
+        row["source"]["head_reference"] = "detection_top" if subject is not None else None
+        row["source"]["estimated_head_fraction_output"] = (
+            None if subject is None else (subject.y1 - comp.crop.y1) / comp.crop.height
+        )
         row["composition"] = asdict(comp)
         row["composition"]["crop"] = list(comp.crop.as_tuple())
         row["crop_xyxy"] = list(comp.crop.as_tuple())
