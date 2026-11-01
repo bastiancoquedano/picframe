@@ -14,6 +14,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "jsonschema>=4,<5",
     "pytest>=8,<10",
     "ruff>=0.14,<1",
 ]
@@ -21,11 +22,18 @@ dev = [
 [project.scripts]
 raceframe = "raceframe.cli.main:main"
 
+[project.optional-dependencies]
+detector = [
+    "opencv-python==4.13.0.92",
+    "ultralytics==8.4.197",
+]
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/raceframe"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = ["real_model: requiere pesos locales y dependencias del detector"]
 pythonpath = ["src"]
 
 [tool.ruff]

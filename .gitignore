@@ -25,3 +25,5 @@ venv/
 *.tmp
 *.swp
 Thumbs.db
+
+.runtime/

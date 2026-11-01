@@ -1,80 +1,97 @@
 # Raceframe
 
-Aplicación de escritorio para macOS Apple Silicon que mejorará el encuadre de fotografías
-deportivas mediante detección local de personas y recortes conservadores.
+Prototipo CLI para mejorar localmente el encuadre de fotografías deportivas JPG/JPEG en macOS
+Apple Silicon. Detecta personas, selecciona un protagonista, calcula recortes conservadores y
+exporta a una carpeta independiente, sin modificar originales.
 
-## Estado
+## Estado actual
 
-Etapa actual de Spec Kit: **implementación**. Primer incremento completado:
+La implementación técnica del CLI está terminada: **42/44 tareas completadas**.
+Las dos tareas pendientes son evaluación con 30–50 fotografías reales y medición de un evento
+completo; el propietario las realizará con ayuda del agente. Todavía no se declara el MVP
+fotográficamente validado. La interfaz gráfica pertenece a la siguiente fase del proyecto.
 
-- Paquete instalable y comando `raceframe --version` / `--help`.
-- Configuración validada, inventario seguro y lectura JPEG con orientación EXIF 1–8.
-- Motor geométrico puro en modo conservador y proporción original, con protección de sujeto,
-  márgenes, límite de pérdida de contexto y conservación de fotografías ya centradas.
-- Pruebas sintéticas de geometría, configuración, orientación y archivos; CI configurada.
+Incluye:
 
-Avance: **12/44 tareas**. Todavía no se detectan corredores automáticamente ni se exportan
-carpetas: esas capacidades se incorporarán en las siguientes tareas. No hay interfaz gráfica.
-Las pruebas de este incremento no sustituyen la validación fotográfica del MVP.
+- YOLO11n local, CPU predeterminada y MPS/auto opcional con preparación comprobada.
+- Selección explicable y copias byte por byte ante ambigüedad o baja confianza.
+- Modos conservador, equilibrado y cerrado; proporción original, 3:2 y 4:5.
+- Recortes que priorizan región del sujeto, márgenes factibles y conservación de contexto.
+- EXIF orientado, perfil ICC, calidad JPEG configurable y advertencias de metadatos no garantizados.
+- Progreso, cancelación, errores por archivo, manifiesto JSON y recuperación de trabajos interrumpidos.
+- Publicación de archivos completos sin reemplazo; entradas originales abiertas solo para lectura.
 
-Documentos: [especificación](specs/001-reencuadre-cli/spec.md),
-[plan](specs/001-reencuadre-cli/plan.md), [tareas](specs/001-reencuadre-cli/tasks.md)
-y [validación del incremento](docs/validacion-cli.md).
+El detector no identifica infaliblemente al protagonista ni todas sus extremidades.
+Las proporciones explícitas significan ancho:alto; si no existe un recorte seguro, se copia el
+original y se marca para revisión. PNG, TIFF, CR3, poses, dorsales y GUI quedan fuera del CLI.
 
-## Principios
+## Operación desde el chat
 
-- Procesar las fotografías localmente y mantener intactos los originales.
-- Preservar el tipo de plano, la integridad visible del sujeto y el máximo contexto posible.
-- Registrar incertidumbre y facilitar revisión humana.
-- Separar geometría, detección, selección, exportación e interfaz.
-- Validar con pruebas automatizadas y 30–50 fotografías reales antes de aceptar el MVP.
+El propietario puede indicar una carpeta y pedir al agente que la procese. No necesita usar
+terminal o editor. Antes de procesar sus fotos, revisaremos juntos origen, destino y parámetros.
+Los comandos siguientes son referencias reproducibles para el agente.
 
-Constitución completa: [.specify/memory/constitution.md](.specify/memory/constitution.md).
-Idea original: [docs/idea-original.md](docs/idea-original.md).
-Decisiones pendientes: [docs/decisiones-pendientes.md](docs/decisiones-pendientes.md).
+## Preparación del entorno
 
-## Entorno de desarrollo
-
-Python 3.11.16, uv, Pillow 13.0.0, pytest y ruff; dependencias fijadas en `uv.lock`.
-Los módulos geométricos no importan Pillow ni bibliotecas de inferencia.
-
-Comandos de referencia para el agente; el propietario no necesita ejecutarlos manualmente:
+Python 3.11.16 y uv. El Mac de desarrollo ya tiene dependencias y pesos preparados.
 
 ```sh
-uv sync --locked
-uv run raceframe --version
-uv run ruff check .
-uv run ruff format --check .
-uv run pytest
+uv sync --locked --extra detector
+uv run --no-sync python scripts/prepare_model.py
+uv run --no-sync raceframe --version
 ```
 
-Una ejecución sin pruebas devuelve código 5 y no valida el MVP. Omitir inferencia real tampoco
-la da por aprobada. No se han instalado YOLO/torch/Qt ni descargado pesos; las fotografías
-usadas por la suite son sintéticas y temporales.
+La preparación descarga dependencias/pesos explícitamente. El procesamiento posterior no usa
+servicios externos ni descarga pesos. Véase [modelos](docs/modelos.md) y [dependencias](docs/dependencias.md).
+Para probar solo geometría y detector simulado, `uv sync --locked` sin el extra basta.
+
+## Procesamiento
+
+```sh
+uv run --no-sync raceframe process /ruta/entrada --output /ruta/salida --model models/yolo11n.pt
+uv run --no-sync raceframe process /ruta/entrada --output /ruta/salida --model models/yolo11n.pt --mode balanced --aspect 4:5 --device auto
+uv run --no-sync raceframe report /ruta/salida/job-UUID
+uv run --no-sync raceframe report /ruta/salida/job-UUID --recover
+```
+
+Cada trabajo crea un subdirectorio exclusivo `job-UUID`. Por defecto, el destino propuesto es
+`Raceframe_Output`, hermano de la entrada. Se rechaza destino dentro de entrada, incluso sin
+recursión. Dentro del trabajo, nombres repetidos reciben sufijos; nunca se sobrescriben salidas.
+Los volúmenes sin publicación exclusiva mediante enlaces duros se rechazan antes de exportar.
+
+Opciones: `--recursive`, `--mode conservative|balanced|tight`, `--aspect original|3:2|4:5`,
+`--margin` (0–0,5), `--quality` (1–95), `--device cpu|mps|auto`, `--config ARCHIVO_JSON`.
+Argumentos explícitos prevalecen sobre archivo y valores por defecto. Pesos y umbrales avanzados
+se configuran mediante JSON y quedan en el manifiesto; consultar [plan](specs/001-reencuadre-cli/plan.md).
+
+Ctrl+C cancela cooperativamente: puede terminar la fotografía activa antes de detenerse.
+Código 0: completado (incluye copias para revisión); 1: completado con errores; 2: preparación
+inválida; 3: fallo global; 130: cancelado. Progreso y diagnósticos a stderr, resumen JSON a stdout.
+`report --recover` requiere trabajo inactivo, verifica salidas preparadas y escribe un informe
+nuevo sin reanudar ni borrar archivos. Un estado interrumpido no es éxito.
+
+## Calidad y límites de validación
+
+```sh
+uv run --no-sync ruff check .
+uv run --no-sync ruff format --check .
+uv run --no-sync pytest
+RACEFRAME_TEST_MODEL="$PWD/models/yolo11n.pt" uv run --no-sync pytest
+```
+
+Sin RACEFRAME_TEST_MODEL las pruebas reales se omiten explícitamente; no se consideran aprobadas.
+Una ejecución sin pruebas tampoco valida el producto. CI ejecuta calidad y pruebas sintéticas;
+inferencia real y bloqueo de red se comprobaron por separado en el Mac.
+[Resultados y cobertura](docs/validacion-cli.md), [evaluación pendiente](docs/evaluacion-fotografica.md)
+y [medición pendiente](docs/rendimiento.md).
 
 ## Spec Kit
 
-Inicializado con Specify CLI 1.0.1, integración `codex` y scripts Bash.
-Las habilidades oficiales están en `.agents/skills/` y los artefactos compartidos en `.specify/`.
+Flujo: constitución → especificación → clarificación → plan → tareas → implementación → convergencia.
+Specify CLI 1.0.1, integración Codex. [Constitución](.specify/memory/constitution.md),
+[especificación](specs/001-reencuadre-cli/spec.md), [plan](specs/001-reencuadre-cli/plan.md)
+y [tareas](specs/001-reencuadre-cli/tasks.md). La aceptación/convergencia completa espera la
+validación real; las casillas pendientes no se completan por pasar pruebas sintéticas.
 
-Secuencia: constitución → especificación → clarificación → plan → tareas → implementación.
-Se aplicó `$speckit-specify` al primer incremento CLI tras la aprobación.
-Clarificaciones integradas; checklist 16/16; `$speckit-plan` completado documentalmente.
-Tareas generadas con `$speckit-tasks`; `$speckit-implement` en curso, con avances verificados.
-
-## Estructura
-
-```text
-.agents/skills/         Habilidades oficiales de Spec Kit
-.specify/              Constitución, plantillas, scripts y flujo oficial
-specs/                 Especificación, plan, contratos y tareas
-src/raceframe/         Paquete Python, configuración, geometría y lectura
-tests/                 Pruebas unitarias, integración y fixtures sintéticos
-docs/                  Idea original, decisiones y registro del bootstrap
-pyproject.toml         Paquete instalable y dependencias
-uv.lock                Resolución reproducible de dependencias
-```
-
-No se establece todavía una licencia de distribución para la aplicación.
-
-Repositorio del proyecto: [bastiancoquedano/raceframe](https://github.com/bastiancoquedano/raceframe).
+Repositorio: [bastiancoquedano/raceframe](https://github.com/bastiancoquedano/raceframe).
+No se incluye una licencia propia de distribución ni fotografías/modelos/entornos en Git.

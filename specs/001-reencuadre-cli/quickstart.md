@@ -1,59 +1,28 @@
-# Guía de validación prevista
+# Guía de validación del CLI implementado
 
-Estado: paquete, pruebas de base y --version ya ejecutables. Los comandos process/report
-siguen siendo diseño futuro y **todavía no están disponibles**.
-Pillow está instalado; YOLO/torch/Qt y los pesos todavía no. El agente ejecutará estos
-pasos cuando corresponda; el propietario no necesita usar terminal ni editor.
+El agente puede operar estos pasos desde el chat, sin que el propietario use una terminal.
 
-## Prerrequisitos de implementación
-
-1. Tareas generadas; implementar los contratos pendientes antes de ejecutar process/report.
-2. Resolver versiones compatibles con uv, revisar licencias, fijar uv.lock y ejecutar uv sync --locked.
-3. Paquete instalable y entry point ya preparados; comprobar uv run raceframe --version.
-4. Preparar YOLO11n explícitamente desde origen oficial, registrar URL, licencia y SHA-256.
-   No usar un peso recibido de terceros sin procedencia; no incorporarlo a Git.
-5. Configurar offline/telemetría antes del import; verificar que no se requiere red.
-6. Disponer de fixtures sintéticos y carpeta privada de 30–50 fotos, fuera del repositorio.
-
-## Comprobaciones automatizadas previstas
+1. `uv sync --locked --extra detector` para el entorno completo.
+2. `uv run --no-sync python scripts/prepare_model.py` prepara pesos oficiales explícitamente.
+   En el Mac de desarrollo ya están preparados; el script verifica el archivo existente.
+3. `uv run --no-sync raceframe --version` comprueba el entry point.
+4. Ejecutar lint/formato y `RACEFRAME_TEST_MODEL="$PWD/models/yolo11n.pt" uv run --no-sync pytest`.
+5. Con permiso sobre la carpeta privada elegida, ejecutar process con destino independiente.
+6. Revisar manifest.json y originales/salidas junto al propietario; no publicar fotografías ni rutas.
+7. Medir un evento real cuando se disponga de él; ver docs/rendimiento.md.
 
 ```sh
-uv run ruff check .
-uv run ruff format --check .
-uv run pytest tests/unit tests/integration
+uv run --no-sync raceframe process /ruta/entrada --output /ruta/salida --model models/yolo11n.pt
+uv run --no-sync raceframe report /ruta/salida/job-UUID
+uv run --no-sync raceframe report /ruta/salida/job-UUID --recover
 ```
 
-Primero geometría y selección con detector simulado: centrado, izquierda/derecha, borde,
-plano medio, múltiples personas, ausencia y cajas inválidas; modos anidados y tres proporciones.
-Después EXIF 1–8, ICC, etiquetas EXIF conocidas, bloque no verificable con advertencia,
-JPEG dañado, colisiones, subcarpetas, symlinks, rutas inseguras, SIGINT, disco lleno y
-fallos entre intención/publicación/confirmación. Comparar hashes de originales antes/después.
+Resultado esperado: subdirectorio exclusivo, fotografías completas, inventario, diario y
+manifiesto. Inciertas: copia íntegra y revisión. Dañadas: error individual y siguiente foto.
+Cancelación: 130 y estado cancelled, sin comenzar otra imagen tras reconocerla.
+Recuperación: trabajo inactivo, hashes comprobados, informe nuevo sin sobrescritura ni reanudación.
 
-La inferencia real es una prueba explícita separada que exige pesos locales; no ocultar una
-prueba no ejecutada como si hubiera pasado. Ensayar process y report con la red bloqueada,
-incluido import del detector. Medir CPU antes de comparar MPS.
-
-## Ejecución prevista sobre fotografías privadas
-
-```sh
-uv run raceframe process /ruta/privada/muestra --output /ruta/privada/salidas --model /ruta/local/yolo11n.pt --device cpu
-uv run raceframe report /ruta/privada/salidas/job-UUID
-```
-
-Resultado esperado: directorio exclusivo, copias/reencuadres completos, inventario, diario y
-manifiesto; originales idénticos. Una foto ambigua legible se copia con hash idéntico y marca
-de revisión. Un error individual no detiene el siguiente archivo. Revisar estado y contadores,
-no únicamente el código de salida. Para SIGINT: 130, estado cancelled, sin falsos éxitos.
-
-Para interrupción abrupta, usar report --recover solo con proceso inactivo y verificar que
-un temporal parcial no se confunda con una fotografía exportada.
-
-## Aceptación fotográfica y escala
-
-Comparar 30–50 pares original/salida. Registrar por foto: protagonista correcto, integridad
-visible, mejora de composición, advertencias y necesidad de intervención. Revisar al menos
-cuerpo completo lateral, plano medio, centrado y borde. Corregir recortes que corten al
-protagonista o derivarlos a revisión; el propietario confirma utilidad estética.
-
-Después probar 2.000–3.500 fotos con registro de dispositivo, tiempo, fotos/segundo y RSS máximo.
-No declarar velocidad, precisión ni MVP aceptado antes de ejecutar y revisar esos resultados.
+Contratos: [CLI](contracts/cli.md), [manifiesto](contracts/manifest.md),
+[esquema JSON](contracts/manifest.schema.json), [datos](data-model.md).
+Evidencias: [validación](../../docs/validacion-cli.md).
+Evaluación fotográfica y evento grande pendientes por indicación del propietario.

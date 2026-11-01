@@ -88,12 +88,6 @@ def test_invalid_dimensions(width, height):
         calculate_crop(width, height, None)
 
 
-def test_unsupported_options_are_explicit():
-    for config in [Config(mode="tight"), Config(aspect="4:5")]:
-        with pytest.raises(NotImplementedError):
-            calculate_crop(600, 400, Box(100, 100, 200, 300), config)
-
-
 def test_many_boxes_respect_geometry_and_context():
     rng = random.Random(52)
     for _ in range(200):

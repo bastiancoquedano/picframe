@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from PIL import Image, ImageOps, UnidentifiedImageError
+from PIL.JpegImagePlugin import JpegImageFile
 
 from raceframe.core.models import InputImage
 from raceframe.imaging.discovery import open_input
@@ -28,7 +29,7 @@ def load_image(root: Path, item: InputImage):
     try:
         with open_input(root, item) as handle, warnings.catch_warnings():
             warnings.simplefilter("error", Image.DecompressionBombWarning)
-            with Image.open(handle) as raw:
+            with JpegImageFile(handle) as raw:
                 if raw.format != "JPEG":
                     raise ValueError("La entrada no contiene un JPEG")
                 raw.load()

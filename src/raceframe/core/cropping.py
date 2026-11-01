@@ -16,19 +16,46 @@ def calculate_crop(
     subject: Box | None,
     config: Config | None = None,
 ) -> Composition:
-    """Recorta solo si mejora el centrado sin sacrificar la región protegida.
-
-    Este primer incremento admite únicamente modo conservador y proporción original.
-    Las otras opciones se rechazan explícitamente hasta completar US4.
-    """
+    """Prioriza integridad y contexto con un solo motor para todos los modos."""
     if type(width) is not int or type(height) is not int or width <= 0 or height <= 0:
         raise ValueError("Las dimensiones deben ser enteros positivos")
     config = config or Config()
-    if config.mode != "conservative" or config.aspect != "original":
-        raise NotImplementedError("Este incremento solo admite conservador y proporción original")
     frame = Box(0, 0, width, height)
+    ratio = {"original": width / height, "3:2": 1.5, "4:5": 0.8}[config.aspect]
+    reference_width = min(width, ceil((height + 0.5) * ratio) - 1)
+    reference_height = min(height, floor(reference_width / ratio + 0.5))
+    reference_area = max(1, reference_width * reference_height)
+
+    def result(status, crop, protected=None, reasons=()):
+        margins = (
+            ()
+            if subject is None or protected is None
+            else (
+                subject.x1 - protected.x1,
+                subject.y1 - protected.y1,
+                protected.x2 - subject.x2,
+                protected.y2 - subject.y2,
+            )
+        )
+        return Composition(
+            status=status,
+            crop=crop,
+            protected=protected,
+            reasons=reasons,
+            retained_area=crop.area / frame.area,
+            retained_reference_area=crop.area
+            / (frame.area if status == CompositionStatus.REVIEW_REQUIRED else reference_area),
+            margin_requested=config.margin,
+            margin_effective_pixels=margins,
+            mode=config.mode,
+            requested_aspect=config.aspect,
+            effective_aspect="original"
+            if status == CompositionStatus.REVIEW_REQUIRED
+            else config.aspect,
+        )
+
     if subject is None:
-        return Composition(CompositionStatus.REVIEW_REQUIRED, frame, reasons=("no_subject",))
+        return result(CompositionStatus.REVIEW_REQUIRED, frame, reasons=("no_subject",))
     if not subject.valid or not frame.contains(subject):
         raise ValueError("La caja del sujeto debe ser válida y estar dentro de la imagen")
 
@@ -43,18 +70,17 @@ def calculate_crop(
     notes = () if frame.contains(expanded) else ("margin_clipped",)
     cx, _ = subject.center
     original_error = abs(cx - width / 2) / width
-    if original_error <= config.center_tolerance:
-        return Composition(
-            CompositionStatus.UNCHANGED, frame, protected, (*notes, "already_centered")
-        )
+    if config.aspect == "original" and original_error <= config.center_tolerance:
+        return result(CompositionStatus.UNCHANGED, frame, protected, (*notes, "already_centered"))
 
-    min_area = width * height * config.retentions[0]
+    mode_index = ("conservative", "balanced", "tight").index(config.mode)
+    min_area = reference_area * config.retentions[mode_index]
     best = None
     best_key = None
     # Enumerar un candidato x/y óptimo por tamaño evita barrer todos los píxeles.
     start_width = max(1, ceil(min_area / height), ceil(protected.width))
-    for crop_width in range(start_width, width + 1):
-        crop_height = floor(crop_width * height / width + 0.5)
+    for crop_width in range(start_width, reference_width + 1):
+        crop_height = floor(crop_width / ratio + 0.5)
         if not 1 <= crop_height <= height or crop_width * crop_height < min_area:
             continue
         xmin = max(0, ceil(protected.x2 - crop_width))
@@ -78,14 +104,12 @@ def calculate_crop(
             best = Box(x, y, x + crop_width, y + crop_height)
 
     if best is None:
-        return Composition(
+        return result(
             CompositionStatus.REVIEW_REQUIRED, frame, protected, (*notes, "infeasible_crop")
         )
     improvement = original_error - abs(cx - best.center[0]) / best.width
-    if best == frame or improvement < config.min_improvement:
-        return Composition(
+    if best == frame or (config.aspect == "original" and improvement < config.min_improvement):
+        return result(
             CompositionStatus.UNCHANGED, frame, protected, (*notes, "insufficient_improvement")
         )
-    return Composition(
-        CompositionStatus.CROPPED, best, protected, notes, retained_area=best.area / frame.area
-    )
+    return result(CompositionStatus.CROPPED, best, protected, notes)

@@ -104,6 +104,9 @@ class Composition:
     protected: Box | None = None
     reasons: tuple[str, ...] = ()
     retained_area: float = 1.0
+    retained_reference_area: float = 1.0
+    margin_requested: float = 0.08
+    margin_effective_pixels: tuple[float, ...] = ()
     mode: str = "conservative"
     requested_aspect: str = "original"
     effective_aspect: str = "original"

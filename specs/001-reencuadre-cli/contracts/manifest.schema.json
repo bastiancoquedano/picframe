@@ -1,0 +1,187 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Raceframe manifest v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "job_id",
+    "created_at",
+    "finished_at",
+    "status",
+    "input_root",
+    "output_root",
+    "config",
+    "runtime",
+    "summary",
+    "images"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "job_id": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "finished_at": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "status": {
+      "enum": [
+        "completed",
+        "completed_with_errors",
+        "cancelled",
+        "failed",
+        "interrupted"
+      ]
+    },
+    "input_root": {
+      "type": "string"
+    },
+    "output_root": {
+      "type": "string"
+    },
+    "config": {
+      "type": "object"
+    },
+    "runtime": {
+      "type": "object"
+    },
+    "summary": {
+      "type": "object",
+      "required": [
+        "total",
+        "exported",
+        "omitted",
+        "errors",
+        "not_attempted",
+        "cropped",
+        "unchanged",
+        "review_required",
+        "elapsed_seconds"
+      ],
+      "properties": {
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "exported": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "omitted": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "errors": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "not_attempted": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "cropped": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unchanged": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "review_required": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "images": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "image_id",
+          "input_relative_path",
+          "source",
+          "detections",
+          "selection_status",
+          "selected_detection_id",
+          "composition",
+          "crop_xyxy",
+          "final_dimensions",
+          "operation_status",
+          "output_relative_path",
+          "output_sha256",
+          "warnings",
+          "error"
+        ],
+        "properties": {
+          "image_id": {
+            "type": "string"
+          },
+          "operation_status": {
+            "enum": [
+              "exported",
+              "omitted",
+              "error",
+              "not_attempted"
+            ]
+          },
+          "selection_status": {
+            "enum": [
+              "selected",
+              "ambiguous",
+              "low_confidence",
+              "no_person",
+              "not_analyzed"
+            ]
+          },
+          "detections": {
+            "type": "array"
+          },
+          "source": {
+            "type": "object"
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "composition": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "crop_xyxy": {
+            "anyOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "array",
+                "minItems": 4,
+                "maxItems": 4,
+                "items": {
+                  "type": "number"
+                }
+              }
+            ]
+          },
+          "error": {
+            "type": [
+              "object",
+              "null"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

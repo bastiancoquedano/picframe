@@ -1,50 +1,74 @@
-# Validación del primer incremento — 2026-11-01
+# Validación técnica — 2026-11-01
 
-## Alcance real
+Implementación CLI completa, sin declarar validación fotográfica del MVP. 42/44 tareas;
+T042/T043 se reservan al propietario por su indicación del 2026-11-01.
 
-T001–T011 y T013 completadas (12/44). Paquete instalable, ayuda/versión, CI configurada,
-fixtures sintéticos, tipos puros, configuración, inventario revalidado, lectura JPEG y
-geometría conservadora/original. No incluye selección automática, exportación, lotes,
-manifiesto, cancelación, YOLO ni GUI. No declara aceptación del MVP.
+## Evidencia
 
-## Evidencia de desarrollo
+- Las pruebas nuevas de exportación, procesamiento, selección, diario y modos se ejecutaron
+  antes de sus implementaciones y reprodujeron los fallos esperados; luego pasaron.
+- Suite completa con pesos locales: 118 pruebas aprobadas, incluidas CPU real y offline.
+- La prueba offline lanza un proceso nuevo bajo sandbox-exec con deny network*, y además
+  intercepta sockets/DNS: import, inferencia y exportación de un JPEG válido, junto a uno
+  dañado, sin intentos de red. El código 1 por el archivo dañado es el resultado esperado.
+- La inferencia sobre bus.jpg (asset público incluido en Ultralytics) detectó personas y
+  devolvió cajas dentro de las dimensiones originales. No demuestra precisión en carreras.
+- MPS auto preparado en este Mac: dispositivo efectivo mps, sin fallback. CPU también probado.
+  Los fallos de MPS y fallback de auto se comprueban con simulación de fallo del backend.
+- SIGINT real: salida 130, imagen activa completa y siguiente imagen no intentada.
+- Recuperación: bloqueo activo, cola truncada, secuencia inválida y hash erróneo comprobados;
+  ningún archivo existente se sobrescribe para reparar un trabajo.
+- EXIF anidado, fecha, GPS, dimensiones, ICC y MakerNote no preservable comprobados.
+  Los recortes registran metadata_unverified: no se promete conservar todos los bloques de Canon.
+- Ultralytics parchea Image.open globalmente; Raceframe usa JpegImageFile explícito para
+  mantener lectura exclusiva de JPEG y evitar la carga inesperada de pi-heif ante una entrada dañada.
+- Dependencias reales resueltas e instaladas; pesos oficiales comprobados por SHA-256 y excluidos de Git.
 
-- Las pruebas de configuración/descubrimiento se escribieron antes de sus módulos y fallaron
-  inicialmente por ausencia de implementación. Tras implementarlos: 37 pruebas aprobadas.
-- Las pruebas de orientación se escribieron antes del loader y fallaron inicialmente por
-  módulo ausente. Con Pillow y lectura implementados: 50 pruebas aprobadas.
-- Las pruebas de recorte se escribieron antes del motor y fallaron inicialmente por módulo
-  ausente. Se añadieron regresiones de redondeo en imágenes estrechas y números enormes.
-- La regresión JSON null reprodujo la aceptación incorrecta de configuración no objeto;
-  se corrigió para rechazarla explícitamente.
-- Verificaciones finales: pytest, ruff check, ruff format --check, instalación reproducible
-  y entry point --version. Ver resultado exacto en el resumen del commit/informe de entrega.
+Los tiempos de pytest no se usan como benchmark fotográfico. CI y pruebas locales se distinguen;
+una ejecución remota solo se afirmará después de comprobarla en GitHub.
 
-## Casos cubiertos
+## Trazabilidad
 
-Conservación de imagen centrada, sujeto lateral, cuerpo completo junto al borde, plano medio,
-márgenes recortados al lienzo, redondeo exterior, proporción original, imágenes verticales,
-dimensiones pequeñas y 200 cajas pseudoaleatorias reproducibles. La suite comprueba que el
-recorte conserva al menos el 85 % del área, contiene la región protegida y mejora el centrado.
+Los archivos de prueba se encuentran bajo tests/unit o tests/integration.
 
-EXIF 1–8: dimensiones y color de una esquina asimétrica para comprobar rotación/reflejo,
-etiqueta de cámara conservada, archivo original sin cambios, ICC capturado y recursos cerrados.
-JPEG dañado y formato ajeno disfrazado de .jpg se rechazan.
+| Requisito / criterio | Evidencia o limitación |
+| --- | --- |
+| FR-001 | test_config.py, test_cli_options.py |
+| FR-002 | test_discovery.py |
+| FR-003 | test_discovery.py, test_export.py |
+| FR-004 | test_discovery.py |
+| FR-005 | test_offline.py (real + sandbox-exec) |
+| FR-006 | test_orientation.py, test_detector_adapter.py, test_detector_cpu.py |
+| FR-007 | test_selection.py |
+| FR-008 | test_selection.py, test_review_policy.py |
+| FR-009 | test_review_policy.py, test_export.py |
+| FR-010 | test_cropping.py, test_cropping_modes.py |
+| FR-011 | test_cropping.py |
+| FR-012 | test_cropping_modes.py |
+| FR-013 | test_cropping_modes.py, test_cli_options.py |
+| FR-014 | test_export.py |
+| FR-015 | test_export.py, test_orientation.py |
+| FR-016 | test_export.py, test_review_policy.py |
+| FR-017 | test_manifest.py |
+| FR-018 | test_manifest.py, test_cancel.py |
+| FR-019 | test_cancel.py, test_cli_basic.py, test_recovery.py |
+| FR-020 | test_batch_failures.py, test_process_basic.py |
+| FR-021 | test_cancel.py (incluye SIGINT real) |
+| FR-022 | una imagen activa en processing.py; volumen real pendiente T043 |
+| FR-023 | test_config.py, test_cli_options.py |
+| FR-024 | pendiente de evaluación del propietario T042 |
+| FR-025 | docs/dependencias.md, docs/modelos.md; uso personal confirmado |
+| SC-001 | test_export.py, test_discovery.py |
+| SC-002 | test_cropping.py, test_cropping_modes.py |
+| SC-003 | test_selection.py, test_review_policy.py |
+| SC-004 | test_manifest.py, test_cancel.py, test_recovery.py, test_batch_failures.py |
+| SC-005 | pendiente de evento real T043 |
+| SC-006 | offline real verificado; muestra de carreras pendiente T042 |
+| SC-007 | pendiente valoración estética del propietario T042 |
+| SC-008 | manifiesto/report implementados; revisión con propietario pendiente T042 |
 
-Inventario: nombres Unicode, mayúsculas, recursión, enlaces de directorio, enlaces fuera de
-raíz, destinos equivalentes al origen y entrada sustituida/modificada. Configuración: JSON
-no objeto, claves duplicadas/desconocidas, valores no finitos, bool numérico y parámetros inválidos.
+## Pendientes de aceptación
 
-Una prueba en proceso nuevo confirma que importar la geometría no carga PIL, cv2, torch,
-ultralytics ni PySide6. Todas las fotografías se generan en carpetas temporales.
-
-## Limitaciones y siguiente incremento
-
-La geometría recibe la caja del sujeto; todavía no la detecta. Solo se admiten modo conservador
-y proporción original; los otros modos/proporciones se rechazan explícitamente hasta US4.
-Proteger una caja no garantiza identificar todas las extremidades reales. No se procesaron
-fotos privadas ni se midió un evento. CI está configurada; una ejecución remota aprobada
-solo se afirmará si se comprueba en GitHub.
-
-Siguiente: T012/T014, pruebas e implementación de exportación JPEG/copia segura sin reemplazo.
-T044 y T041 permanecen pendientes porque incluyen validación del prototipo completo.
+No hay fotografías privadas disponibles en este chat. La evaluación con 30–50 fotos y la
+medición con 2.000–3.500 fotos reales no se ejecutaron. Se harán con el propietario; no se
+simulan como completadas ni se confunden los tests con aceptación estética o rendimiento.
