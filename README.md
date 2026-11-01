@@ -9,7 +9,8 @@ Fase 1 completada. El propietario aprobó avanzar el 2026-10-31.
 Primera especificación redactada: [reencuadre CLI](specs/001-reencuadre-cli/spec.md),
 clarificada el 2026-11-01: uso personal y copia sin cambios de fotografías inciertas,
 marcadas para revisión. [Plan técnico y contratos](specs/001-reencuadre-cli/plan.md) redactados;
-la implementación y las tareas todavía no se han iniciado.
+las [44 tareas de implementación](specs/001-reencuadre-cli/tasks.md) están definidas.
+La implementación todavía no se ha iniciado.
 Todavía no hay motor de recorte ni interfaz ejecutable; no se ha iniciado implementación.
 
 ## Principios
@@ -50,7 +51,7 @@ Las habilidades oficiales están en `.agents/skills/` y los artefactos compartid
 Secuencia: constitución → especificación → clarificación → plan → tareas → implementación.
 Se aplicó `$speckit-specify` al primer incremento CLI tras la aprobación.
 Clarificaciones integradas; checklist 16/16; `$speckit-plan` completado documentalmente.
-Siguiente etapa: `$speckit-tasks`, antes de `$speckit-implement`.
+Tareas generadas con `$speckit-tasks`; siguiente etapa: `$speckit-implement`.
 
 ## Estructura inicial
 
@@ -66,3 +67,5 @@ uv.lock                Resolución reproducible de dependencias de desarrollo
 ```
 
 No se establece todavía una licencia de distribución para la aplicación.
+
+Repositorio del proyecto: [bastiancoquedano/raceframe](https://github.com/bastiancoquedano/raceframe).

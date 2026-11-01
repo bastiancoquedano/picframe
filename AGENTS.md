@@ -6,7 +6,9 @@
 - Bootstrap y constitución completados; el propietario aprobó avanzar el 2026-10-31.
 - Especificación y clarificación cerradas el 2026-11-01; plan técnico y contratos redactados.
 - Uso personal confirmado; fotografías inciertas: copiar bytes sin cambios y marcar revisión.
-- Siguiente etapa: generar tareas con Spec Kit antes de implementar. No saltar tareas ni validación.
+- Tareas generadas en specs/001-reencuadre-cli/tasks.md; seguir sus dependencias y no saltar validación.
+- El propietario autorizó usar https://github.com/bastiancoquedano/raceframe para subir cambios.
+- Publicar solo código/documentación revisados, sin fotos privadas, pesos, credenciales ni entornos.
 - La aprobación de avance ya fue recibida; no volver a pedirla para redactar la especificación.
 - Funcionalidad activa: `specs/001-reencuadre-cli/`; leer spec.md y plan.md antes de generar tareas.
 - No implementar motor, interfaz ni funcionalidades antes de completar las etapas aprobadas.
