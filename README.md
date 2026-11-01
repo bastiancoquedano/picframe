@@ -5,13 +5,21 @@ deportivas mediante detección local de personas y recortes conservadores.
 
 ## Estado
 
-Fase 1 completada. El propietario aprobó avanzar el 2026-10-31.
-Primera especificación redactada: [reencuadre CLI](specs/001-reencuadre-cli/spec.md),
-clarificada el 2026-11-01: uso personal y copia sin cambios de fotografías inciertas,
-marcadas para revisión. [Plan técnico y contratos](specs/001-reencuadre-cli/plan.md) redactados;
-las [44 tareas de implementación](specs/001-reencuadre-cli/tasks.md) están definidas.
-La implementación todavía no se ha iniciado.
-Todavía no hay motor de recorte ni interfaz ejecutable; no se ha iniciado implementación.
+Etapa actual de Spec Kit: **implementación**. Primer incremento completado:
+
+- Paquete instalable y comando `raceframe --version` / `--help`.
+- Configuración validada, inventario seguro y lectura JPEG con orientación EXIF 1–8.
+- Motor geométrico puro en modo conservador y proporción original, con protección de sujeto,
+  márgenes, límite de pérdida de contexto y conservación de fotografías ya centradas.
+- Pruebas sintéticas de geometría, configuración, orientación y archivos; CI configurada.
+
+Avance: **12/44 tareas**. Todavía no se detectan corredores automáticamente ni se exportan
+carpetas: esas capacidades se incorporarán en las siguientes tareas. No hay interfaz gráfica.
+Las pruebas de este incremento no sustituyen la validación fotográfica del MVP.
+
+Documentos: [especificación](specs/001-reencuadre-cli/spec.md),
+[plan](specs/001-reencuadre-cli/plan.md), [tareas](specs/001-reencuadre-cli/tasks.md)
+y [validación del incremento](docs/validacion-cli.md).
 
 ## Principios
 
@@ -27,21 +35,22 @@ Decisiones pendientes: [docs/decisiones-pendientes.md](docs/decisiones-pendiente
 
 ## Entorno de desarrollo
 
-Python 3.11.16, uv y dependencias de desarrollo fijadas en `uv.lock`.
-Se ha elegido esta versión porque ya está instalada en el Mac; se revisará su compatibilidad
-con las dependencias de visión e interfaz durante la planificación.
+Python 3.11.16, uv, Pillow 13.0.0, pytest y ruff; dependencias fijadas en `uv.lock`.
+Los módulos geométricos no importan Pillow ni bibliotecas de inferencia.
 
 Comandos de referencia para el agente; el propietario no necesita ejecutarlos manualmente:
 
 ```sh
 uv sync --locked
+uv run raceframe --version
 uv run ruff check .
 uv run ruff format --check .
 uv run pytest
 ```
 
-En esta fase no hay pruebas de aplicación: pytest sin pruebas devuelve código 5, no una validación.
-No se han instalado dependencias de visión, descargado pesos ni procesado fotografías.
+Una ejecución sin pruebas devuelve código 5 y no valida el MVP. Omitir inferencia real tampoco
+la da por aprobada. No se han instalado YOLO/torch/Qt ni descargado pesos; las fotografías
+usadas por la suite son sintéticas y temporales.
 
 ## Spec Kit
 
@@ -51,19 +60,19 @@ Las habilidades oficiales están en `.agents/skills/` y los artefactos compartid
 Secuencia: constitución → especificación → clarificación → plan → tareas → implementación.
 Se aplicó `$speckit-specify` al primer incremento CLI tras la aprobación.
 Clarificaciones integradas; checklist 16/16; `$speckit-plan` completado documentalmente.
-Tareas generadas con `$speckit-tasks`; siguiente etapa: `$speckit-implement`.
+Tareas generadas con `$speckit-tasks`; `$speckit-implement` en curso, con avances verificados.
 
-## Estructura inicial
+## Estructura
 
 ```text
 .agents/skills/         Habilidades oficiales de Spec Kit
 .specify/              Constitución, plantillas, scripts y flujo oficial
-specs/                 Reservado para futuras especificaciones aprobadas
-src/raceframe/         Reservado para el futuro paquete Python
-tests/                 Reservado para pruebas unitarias, integración y fixtures sintéticos
+specs/                 Especificación, plan, contratos y tareas
+src/raceframe/         Paquete Python, configuración, geometría y lectura
+tests/                 Pruebas unitarias, integración y fixtures sintéticos
 docs/                  Idea original, decisiones y registro del bootstrap
-pyproject.toml         Configuración inicial del entorno
-uv.lock                Resolución reproducible de dependencias de desarrollo
+pyproject.toml         Paquete instalable y dependencias
+uv.lock                Resolución reproducible de dependencias
 ```
 
 No se establece todavía una licencia de distribución para la aplicación.

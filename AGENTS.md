@@ -13,7 +13,9 @@
 - Funcionalidad activa: `specs/001-reencuadre-cli/`; leer spec.md y plan.md antes de generar tareas.
 - No implementar motor, interfaz ni funcionalidades antes de completar las etapas aprobadas.
 - La idea fuente está en `docs/idea-original.md`; conservarla como referencia histórica.
-- Las carpetas de `src/` y `tests/` siguen sin código; la estructura prevista se documenta en plan.md.
+- Implementados paquete, configuración, inventario, orientación EXIF y geometría conservadora.
+- Progreso: T001–T011 y T013 completadas; seguir con exportación segura (T012/T014).
+- La CLI solo expone ayuda y versión hasta integrar el procesamiento; no anunciar process como listo.
 - No modificar fotografías originales ni incorporar fotografías privadas al repositorio.
 - No descargar pesos ni instalar dependencias de visión hasta evaluar su versión y licencias.
 - Registrar resultados verificables. No presentar un entorno configurado como un MVP validado.

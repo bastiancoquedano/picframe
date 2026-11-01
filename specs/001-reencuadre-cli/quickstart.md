@@ -1,14 +1,15 @@
 # Guía de validación prevista
 
-Esta guía contiene comandos de la futura implementación; **todavía no son ejecutables**.
-No se han instalado dependencias de visión ni descargado pesos. El agente ejecutará estos
+Estado: paquete, pruebas de base y --version ya ejecutables. Los comandos process/report
+siguen siendo diseño futuro y **todavía no están disponibles**.
+Pillow está instalado; YOLO/torch/Qt y los pesos todavía no. El agente ejecutará estos
 pasos cuando corresponda; el propietario no necesita usar terminal ni editor.
 
 ## Prerrequisitos de implementación
 
-1. Generar y revisar tareas con Spec Kit; implementar los contratos antes de seguir esta guía.
+1. Tareas generadas; implementar los contratos pendientes antes de ejecutar process/report.
 2. Resolver versiones compatibles con uv, revisar licencias, fijar uv.lock y ejecutar uv sync --locked.
-3. Configurar entry point raceframe y paquete instalable; el bootstrap tiene package=false.
+3. Paquete instalable y entry point ya preparados; comprobar uv run raceframe --version.
 4. Preparar YOLO11n explícitamente desde origen oficial, registrar URL, licencia y SHA-256.
    No usar un peso recibido de terceros sin procedencia; no incorporarlo a Git.
 5. Configurar offline/telemetría antes del import; verificar que no se requiere red.

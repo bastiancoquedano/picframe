@@ -11,15 +11,16 @@ pruebas de cada capacidad antes de implementarla; no marcar pruebas reales no ej
 
 Cada tarea incluye identificador secuencial y rutas relativas al repositorio. [P] identifica
 archivos distintos sin dependencia mutua dentro del grupo indicado. No autoriza crear agentes.
-Las tareas comienzan pendientes: este documento no implica que se haya implementado código.
+Las marcas [X] corresponden a tareas verificadas; [ ] indica trabajo pendiente.
+La aceptación del MVP y las pruebas fotográficas se registran por separado.
 
 ## Phase 1: Setup (Shared Infrastructure)
 
 **Objetivo**: hacer instalable el paquete y preparar validación; Git, uv y Spec Kit ya existen.
 
-- [ ] T001 Configurar paquete src instalable y entry point raceframe en pyproject.toml, src/raceframe/__init__.py y src/raceframe/__main__.py; mantener separadas dependencias ligeras y detector opcional y actualizar uv.lock sin incorporar YOLO todavía.
-- [ ] T002 [P] Definir ejecución de ruff y pruebas unitarias sin pesos en .github/workflows/checks.yml y documentar en README.md que una ejecución sin pruebas o con inferencia omitida no valida el MVP.
-- [ ] T003 [P] Crear fábricas de fotografías y detector simulado en tests/conftest.py y tests/fixtures/README.md; generar fixtures sintéticos temporales, sin fotografías privadas ni binarios de modelos en Git.
+- [X] T001 Configurar paquete src instalable y entry point raceframe en pyproject.toml, src/raceframe/__init__.py y src/raceframe/__main__.py; mantener separadas dependencias ligeras y detector opcional y actualizar uv.lock sin incorporar YOLO todavía.
+- [X] T002 [P] Definir ejecución de ruff y pruebas unitarias sin pesos en .github/workflows/checks.yml y documentar en README.md que una ejecución sin pruebas o con inferencia omitida no valida el MVP.
+- [X] T003 [P] Crear fábricas de fotografías y detector simulado en tests/conftest.py y tests/fixtures/README.md; generar fixtures sintéticos temporales, sin fotografías privadas ni binarios de modelos en Git.
 
 **Checkpoint**: paquete importable; herramientas de calidad ejecutables. T002 y T003 después de T001.
 
@@ -27,13 +28,13 @@ Las tareas comienzan pendientes: este documento no implica que se haya implement
 
 **Objetivo**: tipos, configuración, entrada y orientación compartidos por todas las historias.
 
-- [ ] T004 Definir Box, Detection, Selection, Composition, InputImage, ImageResult, Job y enums en src/raceframe/core/models.py conforme a data-model.md; usar tipos puros sin importar Qt, torch, cv2 ni ultralytics.
-- [ ] T005 [P] Escribir validación de configuración en tests/unit/test_config.py: precedencia CLI/config/defaults, claves desconocidas, valores no finitos, pesos, calidad, márgenes y rangos; cubrir FR-001 y FR-023.
-- [ ] T006 Implementar configuración y serialización de valores efectivos en src/raceframe/config.py, respetando los parámetros numéricos de plan.md y rechazando datos inválidos antes de escribir salidas.
-- [ ] T007 [P] Escribir tests/integration/test_discovery.py para extensiones, Unicode, recursión, inventario estable, rutas equivalentes, enlaces externos y destinos inseguros; cubrir FR-002, FR-003 y FR-004.
-- [ ] T008 Implementar inventario determinista, identidad de rutas y validación de destino en src/raceframe/imaging/discovery.py; no seguir enlaces de directorio ni aceptar destinos dentro de entrada; revalidar archivos al abrir.
-- [ ] T009 Escribir tests/integration/test_orientation.py para EXIF 1–8, dimensiones almacenadas/orientadas, JPEG dañado y orientación inválida; generar imágenes asimétricas para comprobar rotaciones/reflejos.
-- [ ] T010 Incorporar Pillow evaluado, actualizar pyproject.toml y uv.lock e implementar src/raceframe/imaging/loader.py con carga orientada y captura EXIF/ICC; preservar las referencias originales sin guardar sobre ellas.
+- [X] T004 Definir Box, Detection, Selection, Composition, InputImage, ImageResult, Job y enums en src/raceframe/core/models.py conforme a data-model.md; usar tipos puros sin importar Qt, torch, cv2 ni ultralytics.
+- [X] T005 [P] Escribir validación de configuración en tests/unit/test_config.py: precedencia CLI/config/defaults, claves desconocidas, valores no finitos, pesos, calidad, márgenes y rangos; cubrir FR-001 y FR-023.
+- [X] T006 Implementar configuración y serialización de valores efectivos en src/raceframe/config.py, respetando los parámetros numéricos de plan.md y rechazando datos inválidos antes de escribir salidas.
+- [X] T007 [P] Escribir tests/integration/test_discovery.py para extensiones, Unicode, recursión, inventario estable, rutas equivalentes, enlaces externos y destinos inseguros; cubrir FR-002, FR-003 y FR-004.
+- [X] T008 Implementar inventario determinista, identidad de rutas y validación de destino en src/raceframe/imaging/discovery.py; no seguir enlaces de directorio ni aceptar destinos dentro de entrada; revalidar archivos al abrir.
+- [X] T009 Escribir tests/integration/test_orientation.py para EXIF 1–8, dimensiones almacenadas/orientadas, JPEG dañado y orientación inválida; generar imágenes asimétricas para comprobar rotaciones/reflejos.
+- [X] T010 Incorporar Pillow evaluado, actualizar pyproject.toml y uv.lock e implementar src/raceframe/imaging/loader.py con carga orientada y captura EXIF/ICC; preservar las referencias originales sin guardar sobre ellas.
 
 **Checkpoint**: T004 → T005/T007; T006 depende de T005 y T004; T008 de T007 y T006;
 T009 después de T008; T010 después de T009. No comenzar historias sin esta base validada.
@@ -48,12 +49,12 @@ comparar geometría, orientación, salidas y SHA-256 originales sin GUI ni pesos
 
 ### Tests for User Story 1
 
-- [ ] T011 [P] [US1] Escribir tests/unit/test_cropping.py para centrado, izquierda/derecha, bordes, cuerpo completo, plano medio, protección y redondeo exterior; verificar límites y ausencia de recorte agresivo con proporción original.
+- [X] T011 [P] [US1] Escribir tests/unit/test_cropping.py para centrado, izquierda/derecha, bordes, cuerpo completo, plano medio, protección y redondeo exterior; verificar límites y ausencia de recorte agresivo con proporción original.
 - [ ] T012 [P] [US1] Escribir tests/integration/test_export.py para copia byte por byte, calidad JPEG, EXIF/ICC actualizado, miniaturas obsoletas, bloques no verificables, colisiones y original inmutable; cubrir FR-014 a FR-016.
 
 ### Implementation for User Story 1
 
-- [ ] T013 [US1] Implementar motor geométrico puro conservador/original en src/raceframe/core/cropping.py: región protegida, límite de área, centrado horizontal, mínima mejora y resultado sin cambios o revisión; satisfacer T011 sin cargar detector.
+- [X] T013 [US1] Implementar motor geométrico puro conservador/original en src/raceframe/core/cropping.py: región protegida, límite de área, centrado horizontal, mínima mejora y resultado sin cambios o revisión; satisfacer T011 sin cargar detector.
 - [ ] T014 [US1] Implementar preparación temporal y publicación JPEG sin reemplazo en src/raceframe/export/jpeg.py; probar capacidad de enlace exclusivo en destino, conservar copias exactas y auditar metadatos según T012.
 - [ ] T015 [US1] Definir Protocol del detector y selección provisional segura de una sola persona en src/raceframe/core/detection.py y src/raceframe/core/selection.py; varios candidatos siempre requieren revisión hasta US2, sin inferir identidad deportiva.
 - [ ] T016 [US1] Escribir tests/integration/test_process_basic.py y tests/integration/test_cli_basic.py con detector simulado para entrada vacía, fotos legibles/dañadas, rutas inseguras y códigos de salida del contrato.
@@ -232,5 +233,6 @@ No introducir GUI, RAW, pose, dorsales ni reanudación durante estas tareas.
 ## Notes
 
 44 tareas: setup 3, base 7, US1 12, US2 4, US3 8, US4 4, transversal 6.
-No hay hooks before_tasks/after_tasks configurados. Todas las tareas están pendientes.
+No hay hooks before_tasks/after_tasks configurados. Primer incremento completado: T001–T011 y T013 (12/44).
+Las demás tareas permanecen pendientes; no se considera el MVP validado.
 Las limitaciones de acceso a fotos reales se comunicarán al alcanzar T042/T043, sin fabricar resultados.

@@ -20,3 +20,8 @@ models/
 *.mlpackage/
 RaceFrame_Output/
 Raceframe_Output/
+
+venv/
+*.tmp
+*.swp
+Thumbs.db
