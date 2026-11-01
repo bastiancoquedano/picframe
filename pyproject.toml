@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "raceframe"
-version = "0.1.0"
+version = "0.2.0"
 description = "Reencuadre local y conservador de fotografía deportiva para macOS"
 readme = "README.md"
 requires-python = ">=3.11,<3.12"
@@ -16,16 +16,24 @@ dependencies = [
 dev = [
     "jsonschema>=4,<5",
     "pytest>=8,<10",
+    "pytest-qt==4.5.0",
     "ruff>=0.14,<1",
 ]
 
 [project.scripts]
 raceframe = "raceframe.cli.main:main"
+raceframe-gui = "raceframe.ui.__main__:main"
 
 [project.optional-dependencies]
 detector = [
     "opencv-python==4.13.0.92",
     "ultralytics==8.4.197",
+]
+gui = [
+    "pyside6-essentials==6.12.0",
+]
+build = [
+    "pyinstaller==6.22.3",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -35,6 +43,7 @@ packages = ["src/raceframe"]
 testpaths = ["tests"]
 markers = ["real_model: requiere pesos locales y dependencias del detector"]
 pythonpath = ["src"]
+qt_api = "pyside6"
 
 [tool.ruff]
 target-version = "py311"

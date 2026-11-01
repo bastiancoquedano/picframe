@@ -10,7 +10,7 @@
 - El propietario autorizó usar https://github.com/bastiancoquedano/raceframe para subir cambios.
 - Publicar solo código/documentación revisados, sin fotos privadas, pesos, credenciales ni entornos.
 - La aprobación de avance ya fue recibida; no volver a pedirla para redactar la especificación.
-- Funcionalidad activa: `specs/001-reencuadre-cli/`; leer spec.md y plan.md antes de generar tareas.
+- Funcionalidad activa: `specs/002-desktop-interface/`; leer spec.md y plan.md antes de generar tareas.
 - No implementar motor, interfaz ni funcionalidades antes de completar las etapas aprobadas.
 - La idea fuente está en `docs/idea-original.md`; conservarla como referencia histórica.
 - CLI implementado: detección local, selección, modos, exportación, diario, cancelación y reportes.
@@ -26,3 +26,12 @@
 - Focal real >=70 mm: priorizar referencia de cabeza en tercio superior; ocupación 0,75 secundaria.
 - composition_priority=headroom por defecto; occupancy conserva la alternativa previa. Lado largo mínimo 3000 px.
 - Con focal menor o ausente, conservar contexto. Las fotos ambiguas siguen copiándose completas.
+
+- El propietario pidió continuar a interfaz tras la muestra; no excluir personas por espalda.
+- Mantener T042/T043 del CLI pendientes; aprobación de avanzar no equivale a completar esas mediciones.
+
+- Interfaz 0.2.0 implementada y bundle local en dist/Raceframe.app; abrir con Finder.
+- Seguir specs/002-desktop-interface/ y docs/desktop.md. No activar clasificación por espalda ni grupos.
+- Entorno completo: uv sync --locked --extra detector --extra gui --extra build.
+- Pruebas UI con QT_QPA_PLATFORM=offscreen; reales requieren RACEFRAME_TEST_MODEL.
+- No publicar bundle, herramientas, pesos, fotos o logs privados. La .app tiene firma ad hoc, sin notarización.

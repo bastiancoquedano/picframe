@@ -1,6 +1,9 @@
 """Orquestación secuencial; el detector se inyecta y las imágenes se liberan por archivo."""
 
 import errno
+import hashlib
+import json
+from copy import deepcopy
 from dataclasses import asdict
 from datetime import UTC, datetime
 from math import isfinite
@@ -11,7 +14,7 @@ from uuid import uuid4
 from raceframe import __version__
 from raceframe.config import Config
 from raceframe.core.cropping import calculate_focal_crop
-from raceframe.core.models import SelectionStatus
+from raceframe.core.models import Box, Composition, SelectionStatus
 from raceframe.core.selection import select_subject
 from raceframe.export.jpeg import export_image, validate_volume
 from raceframe.export.manifest import AuditError, Journal, atomic_json, summarize
@@ -52,46 +55,103 @@ def blank_result(item):
     }
 
 
-def analyze_item(root, item, row, detector, config, destination, on_prepared=None):
-    with load_image(root, item) as loaded:
-        width, height = loaded.image.size
-        row["source"] = {
-            "stored_dimensions": list(loaded.stored_size),
-            "oriented_dimensions": [width, height],
-            "exif_orientation": loaded.source_orientation,
-        }
-        selection = select_subject(detector.detect(loaded.image), width, height, config)
-        row["selection_status"] = selection.status
-        row["selected_detection_id"] = selection.selected_id
-        row["detections"] = [sanitize(asdict(d)) for d in selection.detections]
-        subject = next(
-            (d.box for d in selection.detections if d.detection_id == selection.selected_id), None
-        )
-        if selection.status != SelectionStatus.SELECTED:
-            subject = None
-        focal = loaded.exif.get_ifd(34665).get(37386)
-        try:
-            focal = float(focal) if focal is not None else None
-            if focal is not None and (not isfinite(focal) or focal <= 0):
-                focal = None
-        except (ValueError, TypeError, ZeroDivisionError):
+def config_fingerprint(config):
+    return hashlib.sha256(json.dumps(config.to_dict(), sort_keys=True).encode()).hexdigest()
+
+
+def input_signature(item):
+    return [item.device, item.inode, item.size_bytes, item.mtime_ns]
+
+
+def analyze_loaded(loaded, row, detector, config):
+    width, height = loaded.image.size
+    row["source"] = {
+        "stored_dimensions": list(loaded.stored_size),
+        "oriented_dimensions": [width, height],
+        "exif_orientation": loaded.source_orientation,
+    }
+    selection = select_subject(detector.detect(loaded.image), width, height, config)
+    row["selection_status"] = selection.status
+    row["selected_detection_id"] = selection.selected_id
+    row["detections"] = [sanitize(asdict(d)) for d in selection.detections]
+    subject = next(
+        (d.box for d in selection.detections if d.detection_id == selection.selected_id), None
+    )
+    if selection.status != SelectionStatus.SELECTED:
+        subject = None
+    focal = loaded.exif.get_ifd(34665).get(37386)
+    try:
+        focal = float(focal) if focal is not None else None
+        if focal is not None and (not isfinite(focal) or focal <= 0):
             focal = None
-        row["source"]["focal_length_mm"] = focal
-        comp = calculate_focal_crop(width, height, subject, config, focal)
-        row["source"]["subject_height_fraction_original"] = (
-            None if subject is None else subject.height / height
-        )
-        row["source"]["subject_height_fraction_output"] = (
-            None if subject is None else subject.height / comp.crop.height
-        )
-        row["source"]["head_reference"] = "detection_top" if subject is not None else None
-        row["source"]["estimated_head_fraction_output"] = (
-            None if subject is None else (subject.y1 - comp.crop.y1) / comp.crop.height
-        )
-        row["composition"] = asdict(comp)
-        row["composition"]["crop"] = list(comp.crop.as_tuple())
-        row["crop_xyxy"] = list(comp.crop.as_tuple())
-        row["warnings"] = list(dict.fromkeys((*loaded.warnings, *selection.reasons, *comp.reasons)))
+    except (ValueError, TypeError, ZeroDivisionError):
+        focal = None
+    row["source"]["focal_length_mm"] = focal
+    comp = calculate_focal_crop(width, height, subject, config, focal)
+    row["source"]["subject_height_fraction_original"] = (
+        None if subject is None else subject.height / height
+    )
+    row["source"]["subject_height_fraction_output"] = (
+        None if subject is None else subject.height / comp.crop.height
+    )
+    row["source"]["head_reference"] = "detection_top" if subject is not None else None
+    row["source"]["estimated_head_fraction_output"] = (
+        None if subject is None else (subject.y1 - comp.crop.y1) / comp.crop.height
+    )
+    row["composition"] = asdict(comp)
+    row["composition"]["crop"] = list(comp.crop.as_tuple())
+    row["crop_xyxy"] = list(comp.crop.as_tuple())
+    row["warnings"] = list(dict.fromkeys((*loaded.warnings, *selection.reasons, *comp.reasons)))
+    return comp
+
+
+def analyze_image(root, item, detector, config):
+    row = blank_result(item)
+    with load_image(root, item) as loaded:
+        analyze_loaded(loaded, row, detector, config)
+    row["input_signature"] = input_signature(item)
+    row["analysis_config_fingerprint"] = config_fingerprint(config)
+    row["analysis_model_sha256"] = getattr(detector, "runtime", {}).get("model_sha256")
+    return row
+
+
+def cached_composition(cached, item, loaded, detector, config):
+    if cached.get("input_signature") != input_signature(item):
+        raise ValueError("La fotografía cambió después del análisis; vuelve a analizar")
+    if cached.get("analysis_config_fingerprint") != config_fingerprint(config):
+        raise ValueError("La configuración cambió; vuelve a analizar")
+    if cached.get("analysis_model_sha256") != getattr(detector, "runtime", {}).get("model_sha256"):
+        raise ValueError("El modelo cambió; vuelve a analizar")
+    if cached["source"]["oriented_dimensions"] != list(loaded.image.size):
+        raise ValueError("Dimensiones de análisis obsoletas")
+    values = deepcopy(cached["composition"])
+    values["crop"] = Box(*values["crop"])
+    values["protected"] = Box(**values["protected"]) if values.get("protected") else None
+    comp = Composition(**values)
+    if comp.protected and not comp.crop.contains(comp.protected):
+        raise ValueError("El recorte revisado excluye la región protegida")
+    return comp
+
+
+def analyze_item(root, item, row, detector, config, destination, on_prepared=None, cached=None):
+    with load_image(root, item) as loaded:
+        if cached is None:
+            comp = analyze_loaded(loaded, row, detector, config)
+        else:
+            comp = cached_composition(cached, item, loaded, detector, config)
+            for key in (
+                "source",
+                "detections",
+                "selection_status",
+                "selected_detection_id",
+                "composition",
+                "crop_xyxy",
+                "warnings",
+                "manual_selection",
+                "manual_crop",
+            ):
+                if key in cached:
+                    row[key] = deepcopy(cached[key])
         callback = None if on_prepared is None else lambda intent: on_prepared(row, intent)
         exported = export_image(
             root, item, loaded, comp, destination, quality=config.quality, before_publish=callback
@@ -105,11 +165,24 @@ def analyze_item(root, item, row, detector, config, destination, on_prepared=Non
         row["warnings"].extend(exported.warnings)
 
 
-def process_folder(source, output=None, *, detector, config=None, progress=None, cancel=None):
+def process_folder(
+    source,
+    output=None,
+    *,
+    detector,
+    config=None,
+    progress=None,
+    cancel=None,
+    analysis_overrides=None,
+):
     config = config or Config()
     inventory = discover(
         Path(source), None if output is None else Path(output), recursive=config.recursive
     )
+    if analysis_overrides is not None and {i.image_id for i in inventory.images} != set(
+        analysis_overrides
+    ):
+        raise ValueError("El contenido de la carpeta cambió; vuelve a analizar antes de exportar")
     inventory.destination.mkdir(parents=True, exist_ok=True)
     destination = inventory.destination / f"job-{uuid4()}"
     destination.mkdir()
@@ -153,7 +226,20 @@ def process_folder(source, output=None, *, detector, config=None, progress=None,
             journal.record("image_started", image_id=item.image_id)
             fatal = False
             try:
-                analyze_item(inventory.root, item, row, detector, config, destination, prepared)
+                if analysis_overrides is not None and item.image_id not in analysis_overrides:
+                    raise ValueError("Nueva fotografía no analizada; vuelve a analizar la carpeta")
+                analyze_item(
+                    inventory.root,
+                    item,
+                    row,
+                    detector,
+                    config,
+                    destination,
+                    prepared,
+                    cached=None
+                    if analysis_overrides is None
+                    else analysis_overrides.get(item.image_id),
+                )
             except AuditError:
                 raise
             except Exception as exc:

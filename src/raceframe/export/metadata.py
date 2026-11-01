@@ -5,6 +5,7 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 import tempfile
 from collections import Counter
 from pathlib import Path
@@ -17,14 +18,22 @@ class MetadataError(ValueError):
 def tool_path():
     configured = os.environ.get("RACEFRAME_EXIFTOOL")
     local = Path(__file__).resolve().parents[3] / ".runtime/exiftool/exiftool"
-    found = configured or shutil.which("exiftool") or (str(local) if local.is_file() else None)
+    bundled = Path(getattr(sys, "_MEIPASS", "")) / "exiftool/exiftool"
+    found = (
+        configured
+        or (str(bundled) if getattr(sys, "frozen", False) and bundled.is_file() else None)
+        or shutil.which("exiftool")
+        or (str(local) if local.is_file() else None)
+    )
     if not found:
         raise MetadataError("Falta ExifTool: no se publicará un recorte sin verificar metadatos")
     return found
 
 
 def run_tool(arguments):
-    result = subprocess.run([tool_path(), *arguments], capture_output=True, timeout=60)
+    tool = tool_path()
+    command = ["/usr/bin/perl", tool] if sys.platform == "darwin" else [tool]
+    result = subprocess.run([*command, *arguments], capture_output=True, timeout=60)
     if result.returncode or result.stderr.strip():
         raise MetadataError(
             "ExifTool no pudo verificar/copiar los metadatos: "

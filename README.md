@@ -6,24 +6,22 @@ exporta a una carpeta independiente, sin modificar originales.
 
 ## Estado actual
 
-La implementación técnica del CLI está terminada: **47/49 tareas completadas**.
-Las dos tareas pendientes son evaluación con 30–50 fotografías reales y medición de un evento
-completo; el propietario las realizará con ayuda del agente. Todavía no se declara el MVP
-fotográficamente validado. La interfaz gráfica pertenece a la siguiente fase del proyecto.
+**Raceframe 0.2.0 ya tiene interfaz de escritorio**, además del CLI.
+La aplicación local está en `dist/Raceframe.app`: abrir con doble clic en Finder.
+Permite elegir carpetas, analizar en segundo plano, comparar original/recorte, seleccionar
+otro corredor, dibujar un recorte seguro y exportar con los metadatos verificados.
 
-Incluye:
+[Guía de escritorio](docs/desktop.md) · [validación](docs/desktop-validation.md)
 
-- YOLO11n local, CPU predeterminada y MPS/auto opcional con preparación comprobada.
-- Selección explicable y copias byte por byte ante ambigüedad o baja confianza.
-- Modos conservador, equilibrado y cerrado; proporción original, 3:2 y 4:5.
-- Recortes que priorizan región del sujeto, márgenes factibles y conservación de contexto.
-- Conservación estricta EXIF/MakerNotes y APP/COM con verificación antes de publicar; ExifTool requerido.
-- Progreso, cancelación, errores por archivo, manifiesto JSON y recuperación de trabajos interrumpidos.
-- Publicación de archivos completos sin reemplazo; entradas originales abiertas solo para lectura.
+![Interfaz con imagen sintética](docs/desktop-preview.png)
 
-El detector no identifica infaliblemente al protagonista ni todas sus extremidades.
-Las proporciones explícitas significan ancho:alto; si no existe un recorte seguro, se copia el
-original y se marca para revisión. PNG, TIFF, CR3, poses, dorsales y GUI quedan fuera del CLI.
+La detección sigue sin excluir personas por espalda ni agrupar automáticamente. Las fotos
+ambiguas quedan para revisión y pueden resolverse eligiendo manualmente al protagonista.
+Metadatos estrictos, focal real, prioridad de espacio superior y límites de resolución se
+comparten con el CLI. Los originales no se modifican.
+
+El bundle local está preparado y probado en este Mac; no está notarizado para distribución.
+La evaluación completa con 30–50 fotos y el lote grande de T042/T043 siguen pendientes.
 
 ## Operación desde el chat
 
@@ -36,7 +34,7 @@ Los comandos siguientes son referencias reproducibles para el agente.
 Python 3.11.16 y uv. El Mac de desarrollo ya tiene dependencias y pesos preparados.
 
 ```sh
-uv sync --locked --extra detector
+uv sync --locked --extra detector --extra gui
 uv run --no-sync python scripts/prepare_model.py
 uv run --no-sync python scripts/prepare_metadata_tool.py
 uv run --no-sync raceframe --version
@@ -44,7 +42,8 @@ uv run --no-sync raceframe --version
 
 La preparación descarga dependencias/pesos explícitamente. El procesamiento posterior no usa
 servicios externos ni descarga pesos. Véase [modelos](docs/modelos.md) y [dependencias](docs/dependencias.md).
-Para probar solo geometría y detector simulado, `uv sync --locked` sin el extra basta.
+La GUI es un extra opcional para el CLI. La suite completa de desarrollo requiere `--extra gui`
+porque ahora incluye pruebas de widgets; el núcleo geométrico sigue sin importar Qt.
 
 ## Procesamiento
 
@@ -81,7 +80,7 @@ RACEFRAME_TEST_MODEL="$PWD/models/yolo11n.pt" uv run --no-sync pytest
 ```
 
 Sin RACEFRAME_TEST_MODEL las pruebas reales se omiten explícitamente; no se consideran aprobadas.
-Una ejecución sin pruebas tampoco valida el producto. CI ejecuta calidad y pruebas sintéticas;
+Una ejecución sin pruebas tampoco valida el producto. CI ejecuta calidad y pruebas sintéticas de núcleo e interfaz con Qt offscreen;
 inferencia real y bloqueo de red se comprobaron por separado en el Mac.
 [Resultados y cobertura](docs/validacion-cli.md), [evaluación pendiente](docs/evaluacion-fotografica.md)
 y [medición pendiente](docs/rendimiento.md).
@@ -91,8 +90,8 @@ y [medición pendiente](docs/rendimiento.md).
 Flujo: constitución → especificación → clarificación → plan → tareas → implementación → convergencia.
 Specify CLI 1.0.1, integración Codex. [Constitución](.specify/memory/constitution.md),
 [especificación](specs/001-reencuadre-cli/spec.md), [plan](specs/001-reencuadre-cli/plan.md)
-y [tareas](specs/001-reencuadre-cli/tasks.md). La aceptación/convergencia completa espera la
-validación real; las casillas pendientes no se completan por pasar pruebas sintéticas.
+y [tareas](specs/001-reencuadre-cli/tasks.md). La interfaz tiene su especificación y tareas en `specs/002-desktop-interface/`.
+La aceptación/convergencia completa de la fotografía espera la validación real; las casillas pendientes no se completan por pasar pruebas sintéticas.
 
 Repositorio: [bastiancoquedano/raceframe](https://github.com/bastiancoquedano/raceframe).
 No se incluye una licencia propia de distribución ni fotografías/modelos/entornos en Git.

@@ -2,6 +2,8 @@ name: Calidad
 on: [push, pull_request]
 permissions:
   contents: read
+env:
+  QT_QPA_PLATFORM: offscreen
 jobs:
   tests:
     runs-on: ubuntu-latest
@@ -10,8 +12,8 @@ jobs:
       - uses: astral-sh/setup-uv@v6
         with:
           version: "0.12.7"
-      - run: sudo apt-get update && sudo apt-get install -y libimage-exiftool-perl
-      - run: uv sync --locked
-      - run: uv run ruff check .
-      - run: uv run ruff format --check .
-      - run: uv run pytest tests/unit tests/integration
+      - run: sudo apt-get update && sudo apt-get install -y libimage-exiftool-perl libegl1 libopengl0
+      - run: uv sync --locked --extra gui
+      - run: uv run --no-sync ruff check .
+      - run: uv run --no-sync ruff format --check .
+      - run: uv run --no-sync pytest tests/unit tests/integration
