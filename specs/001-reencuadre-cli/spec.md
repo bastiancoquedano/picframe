@@ -4,11 +4,18 @@
 
 **Created**: 2026-10-31
 
-**Status**: Draft — pendiente de dos clarificaciones del propietario
+**Status**: Especificación clarificada — lista para planificación (2026-11-01)
 
 **Input**: Idea maestra conservada en `docs/idea-original.md`; aprobación del bootstrap
 recibida el 2026-10-31. Primer incremento: procesar fotografías deportivas localmente,
 seleccionar protagonista, proponer recortes conservadores, exportar y auditar resultados.
+
+## Clarifications
+
+### Session 2026-11-01
+
+- Q: ¿Cuál es el destino previsto de Raceframe? → A: Uso personal por ahora; evaluar distribución más adelante.
+- Q: ¿Qué exportar cuando no hay protagonista fiable? → A: Copiar la fotografía sin cambios y marcarla para revisión.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -60,7 +67,7 @@ de personas, inspeccionando la decisión y sus motivos sin depender de la export
 2. **Given** candidatos con puntuaciones dentro de la tolerancia de ambigüedad configurada,
    **When** se decide, **Then** se marca para revisión y no se aplica un recorte automático.
 3. **Given** ninguna persona válida o confianza insuficiente, **When** se analiza,
-   **Then** se registra el motivo y se aplica la política de exportación que el propietario confirme.
+   **Then** se registra el motivo, se copia el archivo sin cambios y se marca para revisión.
 4. **Given** un resultado marcado, **When** el fotógrafo revisa el manifiesto,
    **Then** puede identificar la foto original, las detecciones, las puntuaciones y el motivo.
 
@@ -134,8 +141,8 @@ comparar regiones, contexto preservado y advertencias sin ejecutar un detector r
   manifiestos identificables sin sobrescritura.
 - Entrada y destino equivalentes por enlaces simbólicos: tratar como la misma ubicación.
   Por defecto no seguir enlaces a directorios durante el recorrido recursivo para evitar ciclos.
-- Imagen demasiado pequeña para el recorte o proporción inviable: conservar sin recortar
-  o marcar pendiente según la política confirmada y registrar el motivo.
+- Imagen demasiado pequeña para el recorte o proporción inviable: copiar sin cambios,
+  marcar para revisión y registrar el motivo.
 - Cancelación o cierre abrupto: distinguir cancelación gestionada de trabajo interrumpido;
   una exportación parcial nunca cuenta como fotografía completada.
 - Modelo no disponible localmente: explicar el problema antes de analizar;
@@ -162,8 +169,9 @@ comparar regiones, contexto preservado y advertencias sin ejecutar un detector r
   sobre visibilidad o identidad. Las tolerancias configuradas DEBEN permitir reproducir la decisión.
 - **FR-008**: Se DEBEN distinguir selección fiable, ambigüedad, baja confianza y ausencia de personas.
   Las tres últimas NO DEBEN recibir un recorte automático; requieren revisión.
-- **FR-009**: Para fotografías inciertas o sin recorte seguro, la exportación DEBE seguir
-  [NEEDS CLARIFICATION: ¿copiar sin cambios y marcar para revisión, o no exportar y registrar como pendiente?].
+- **FR-009**: Para fotografías inciertas o sin recorte seguro, la exportación DEBE copiar
+  el archivo sin cambios, byte por byte, y marcarlo para revisión con el motivo registrado.
+  Una entrada ilegible o una copia fallida se registra como error, sin simular una salida exitosa.
 - **FR-010**: El recorte DEBE quedar dentro de la imagen, preservar la región detectada del sujeto,
   respetar márgenes factibles y mejorar el centrado horizontal cuando sea posible sin incumplir
   esos límites ni el grado de conservación de contexto del modo. No se exige centrar verticalmente.
@@ -206,9 +214,9 @@ comparar regiones, contexto preservado y advertencias sin ejecutar un detector r
 - **FR-024**: El prototipo DEBE acompañarse de una comparación local de originales y resultados
   para 30–50 fotografías reales, anotando protagonista correcto, integridad visible, composición
   y necesidad de intervención. Esta revisión NO requiere desarrollar una interfaz gráfica.
-- **FR-025**: El alcance de distribución para evaluar dependencias y modelos queda pendiente:
-  [NEEDS CLARIFICATION: ¿uso personal inicial, publicación abierta o distribución comercial cerrada?].
-  La decisión no autoriza publicación ni determina por sí sola una licencia compatible.
+- **FR-025**: El prototipo se destina a uso personal; la distribución se evaluará más adelante.
+  Se DEBEN revisar las licencias de dependencias y modelos antes de incorporarlos.
+  Esta decisión no autoriza publicación ni determina por sí sola una licencia compatible.
 
 ### Key Entities *(include if feature involves data)*
 

@@ -15,8 +15,8 @@
 
 ## Requirement Completeness
 
-- [ ] No quedan marcadores de clarificación: pendientes FR-009 y FR-025.
-- [ ] Todos los requisitos son comprobables y unívocos: FR-009 depende de la respuesta del propietario.
+- [x] No quedan marcadores de clarificación: pendientes FR-009 y FR-025.
+- [x] Todos los requisitos son comprobables y unívocos: FR-009 depende de la respuesta del propietario.
 - [x] Criterios de éxito medibles sin promesas de rendimiento no verificadas.
 - [x] Criterios de éxito independientes de tecnología.
 - [x] Escenarios de aceptación definidos para las cuatro historias.
@@ -26,7 +26,7 @@
 
 ## Feature Readiness
 
-- [ ] Todos los requisitos tienen aceptación cerrada: falta concretar la política de FR-009.
+- [x] Todos los requisitos tienen aceptación cerrada: falta concretar la política de FR-009.
 - [x] Las historias cubren los flujos principales.
 - [x] Los resultados esperados tienen criterios de evaluación en SC-001 a SC-008.
 - [x] No se han introducido algoritmos, dependencias concretas ni contratos técnicos como decisiones cerradas.
