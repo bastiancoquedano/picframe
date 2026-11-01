@@ -37,6 +37,10 @@ def main(argv=None, *, detector_factory=None):
     process.add_argument("--margin", type=float)
     process.add_argument("--quality", type=int)
     process.add_argument("--device", choices=("cpu", "mps", "auto"))
+    process.add_argument("--framing-policy", choices=("focal", "context"))
+    process.add_argument("--focal-threshold", type=float)
+    process.add_argument("--target-occupancy", type=float)
+    process.add_argument("--min-long-edge", type=int)
     report = sub.add_parser("report", help="Consultar o recuperar un trabajo local")
     report.add_argument("directory", type=Path)
     report.add_argument("--recover", action="store_true")
@@ -61,7 +65,18 @@ def main(argv=None, *, detector_factory=None):
     try:
         overrides = {
             name: getattr(args, name)
-            for name in ("recursive", "mode", "aspect", "margin", "quality", "device")
+            for name in (
+                "recursive",
+                "mode",
+                "aspect",
+                "margin",
+                "quality",
+                "device",
+                "framing_policy",
+                "focal_threshold",
+                "target_occupancy",
+                "min_long_edge",
+            )
             if getattr(args, name) is not None
         }
         config = (
@@ -80,6 +95,9 @@ def main(argv=None, *, detector_factory=None):
             from raceframe.core.detection import YoloDetector
 
             detector_factory = YoloDetector
+        from raceframe.export.metadata import tool_path
+
+        tool_path()
         detector = detector_factory(args.model, config)
     except KeyboardInterrupt:
         return _error("cancelled", "Preparación cancelada", 130)

@@ -7,9 +7,8 @@ import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
-from PIL import Image
-
 from raceframe.core.models import Box, CompositionStatus
+from raceframe.export.metadata import preserve_metadata
 from raceframe.imaging.discovery import open_input
 
 
@@ -47,30 +46,6 @@ class ExportResult:
     warnings: tuple[str, ...] = ()
 
 
-def _cropped_exif(loaded, size):
-    source = loaded.exif
-    result = Image.Exif()
-    # Serializar de nuevo evita conservar miniaturas con coordenadas antiguas.
-    excluded = {274, 256, 257, 34665, 34853, 513, 514, 40965, 37500}
-    for tag, value in source.items():
-        if tag not in excluded:
-            result[tag] = value
-    result[274] = 1
-    result[256], result[257] = size
-    exif_ifd = dict(source.get_ifd(34665)) if 34665 in source else {}
-    dropped = 37500 in exif_ifd or 37500 in source
-    exif_ifd.pop(37500, None)  # MakerNotes tienen offsets y convenciones del fabricante.
-    exif_ifd.pop(40965, None)
-    exif_ifd[40962], exif_ifd[40963] = size
-    result[34665] = exif_ifd
-    if 34853 in source:
-        result[34853] = dict(source.get_ifd(34853))
-    notes = ["metadata_unverified"]
-    if dropped:
-        notes.append("metadata_dropped:MakerNote")
-    return result, tuple(notes)
-
-
 def export_image(root, item, loaded, composition, destination, *, quality=95, before_publish=None):
     destination = Path(destination).resolve(strict=True)
     if destination == root:
@@ -97,16 +72,22 @@ def export_image(root, item, loaded, composition, destination, *, quality=95, be
             else:
                 with loaded.image.crop(tuple(map(int, box.as_tuple()))) as cropped:
                     dimensions = cropped.size
-                    exif, notes = _cropped_exif(loaded, dimensions)
                     cropped.save(
                         output,
                         format="JPEG",
                         quality=quality,
-                        exif=exif,
-                        icc_profile=loaded.icc_profile,
                     )
             output.flush()
             os.fsync(output.fileno())
+        if composition.status == CompositionStatus.CROPPED:
+            with (
+                open_input(root, item) as source,
+                loaded.image.crop(tuple(map(int, box.as_tuple()))) as cropped,
+            ):
+                preserve_metadata(source, temporary, cropped)
+            with temporary.open("rb") as confirmed:
+                os.fsync(confirmed.fileno())
+            notes = ("metadata_verified",)
         digest = file_hash(temporary)
         base = Path(item.relative_path).name
         stem, extension = Path(base).stem, Path(base).suffix

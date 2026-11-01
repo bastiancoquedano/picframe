@@ -31,3 +31,7 @@ Invariantes verificables:
 El diario es fuente de reconstrucción si falta manifest.json. Un manifiesto presente no implica
 éxito: el consumidor debe leer status y contadores. No usar el diario como API pública estable
 fuera de la versión del trabajo sin comprobar schema_version.
+
+El campo source añade focal_length_mm y subject_height_fraction_original/output (nullable).
+Config registra la política por focal y límites. metadata_verified señala comparación
+satisfactoria antes de publicar; no se emite una salida recortada con advertencias de pérdida.

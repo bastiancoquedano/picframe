@@ -10,7 +10,7 @@ from uuid import uuid4
 
 from raceframe import __version__
 from raceframe.config import Config
-from raceframe.core.cropping import calculate_crop
+from raceframe.core.cropping import calculate_focal_crop
 from raceframe.core.models import SelectionStatus
 from raceframe.core.selection import select_subject
 from raceframe.export.jpeg import export_image, validate_volume
@@ -69,7 +69,21 @@ def analyze_item(root, item, row, detector, config, destination, on_prepared=Non
         )
         if selection.status != SelectionStatus.SELECTED:
             subject = None
-        comp = calculate_crop(width, height, subject, config)
+        focal = loaded.exif.get_ifd(34665).get(37386)
+        try:
+            focal = float(focal) if focal is not None else None
+            if focal is not None and (not isfinite(focal) or focal <= 0):
+                focal = None
+        except (ValueError, TypeError, ZeroDivisionError):
+            focal = None
+        row["source"]["focal_length_mm"] = focal
+        comp = calculate_focal_crop(width, height, subject, config, focal)
+        row["source"]["subject_height_fraction_original"] = (
+            None if subject is None else subject.height / height
+        )
+        row["source"]["subject_height_fraction_output"] = (
+            None if subject is None else subject.height / comp.crop.height
+        )
         row["composition"] = asdict(comp)
         row["composition"]["crop"] = list(comp.crop.as_tuple())
         row["crop_xyxy"] = list(comp.crop.as_tuple())

@@ -74,3 +74,11 @@ Fuentes primarias:
 - [OpenCV](https://pypi.org/project/opencv-python/4.13.0.92/).
 - [PyTorch](https://pypi.org/project/torch/2.15.0/).
 - [Pillow](https://pypi.org/project/pillow/13.0.0/).
+
+## Conservación estricta de metadatos
+
+ExifTool oficial 13.58 (Perl), revisión 38bdbace3037a89d2c332664fc60bddad118958a,
+preparado en .runtime/exiftool y excluido de Git. Fuente: https://github.com/exiftool/exiftool .
+Licencias: https://exiftool.org/#license (mismas condiciones que Perl, consultar distribución).
+Alternativa: exiftool del sistema o variable RACEFRAME_EXIFTOOL. CI instala el paquete oficial
+de la distribución Ubuntu. El script de preparación verifica la revisión local fijada.

@@ -49,7 +49,7 @@ def test_crop_metadata_and_orientation(photo_factory, tmp_path):
         assert output.info["icc_profile"] == profile
     assert item.path.read_bytes() == before
     assert intents[0]["sha256"] == result.sha256
-    assert "metadata_unverified" in result.warnings
+    assert "metadata_verified" in result.warnings
 
 
 def test_publication_failure_leaves_no_final_file(photo_factory, tmp_path, monkeypatch):
@@ -93,7 +93,7 @@ def test_invalid_crop_rejected(photo_factory, tmp_path):
     assert not list(dest.iterdir())
 
 
-def test_exif_subfields_and_makernote_warning(photo_factory, tmp_path):
+def test_exif_subfields_and_makernote_preserved(photo_factory, tmp_path):
     path = photo_factory("input/a.jpg")
     with Image.open(path) as image:
         exif = image.getexif()
@@ -113,5 +113,108 @@ def test_exif_subfields_and_makernote_warning(photo_factory, tmp_path):
         assert exif.get_ifd(34665)[36867] == "2026:11:01 12:00:00"
         assert exif.get_ifd(34665)[40962] == 100
         assert exif.get_ifd(34853)[1] == "N"
-        assert 37500 not in exif.get_ifd(34665)
-    assert "metadata_dropped:MakerNote" in result.warnings
+        assert exif.get_ifd(34665)[37500] == b"opaque maker data"
+    assert "metadata_verified" in result.warnings
+
+
+def test_unknown_app_block_preserved(photo_factory, tmp_path):
+    path = photo_factory("input/a.jpg")
+    payload = b"unknown-app-private-data"
+    segment = b"\xff\xef" + (len(payload) + 2).to_bytes(2, "big") + payload
+    data = path.read_bytes()
+    path.write_bytes(data[:2] + segment + data[2:])
+    inv = discover(path.parent)
+    dest = tmp_path / "out"
+    dest.mkdir()
+    with load_image(inv.root, inv.images[0]) as loaded:
+        result = export_image(
+            inv.root,
+            inv.images[0],
+            loaded,
+            Composition(CompositionStatus.CROPPED, Box(0, 0, 100, 70)),
+            dest,
+        )
+    assert segment in result.path.read_bytes()
+
+
+def test_no_crop_published_without_metadata_verification(photo_factory, tmp_path, monkeypatch):
+    import raceframe.export.metadata as metadata
+
+    path = photo_factory("input/a.jpg")
+    inv = discover(path.parent)
+    dest = tmp_path / "out"
+    dest.mkdir()
+
+    def missing():
+        raise metadata.MetadataError("unavailable")
+
+    monkeypatch.setattr(metadata, "tool_path", missing)
+    with load_image(inv.root, inv.images[0]) as loaded:
+        with pytest.raises(metadata.MetadataError):
+            export_image(
+                inv.root,
+                inv.images[0],
+                loaded,
+                Composition(CompositionStatus.CROPPED, Box(0, 0, 100, 70)),
+                dest,
+            )
+    assert list(dest.iterdir()) == []
+
+
+@pytest.mark.parametrize("size,success", [((120, 80), False), ((1200, 800), True)])
+def test_mpf_auxiliary_preview_survives_crop(photo_factory, tmp_path, size, success):
+    import io
+    import struct
+
+    from raceframe.export.metadata import is_metadata, jpeg_header, run_tool
+
+    path = photo_factory("input/a.jpg", size=size)
+    original = path.read_bytes()
+    stream = io.BytesIO()
+    with Image.new("RGB", (40, 30), "orange") as preview:
+        preview.save(stream, format="JPEG")
+    auxiliary = stream.getvalue()
+    # MPF TIFF: versión, número de imágenes y tabla con dos entradas de 16 bytes.
+    ifd = (
+        struct.pack("<H", 3)
+        + struct.pack("<HHI4s", 0xB000, 7, 4, b"0100")
+        + struct.pack("<HHII", 0xB001, 4, 1, 2)
+        + struct.pack("<HHII", 0xB002, 7, 32, 50)
+        + struct.pack("<I", 0)
+    )
+    payload_size = 4 + 8 + len(ifd) + 32
+    segment_size = payload_size + 4
+    primary_size = len(original) + segment_size
+    insertion = 2 + sum(len(raw) for marker, raw in jpeg_header(original)[0] if is_metadata(marker))
+    entries = struct.pack("<IIIHH", 0x20030000, primary_size, 0, 0, 0) + struct.pack(
+        "<IIIHH", 0x00010002, len(auxiliary), primary_size - (insertion + 8), 0, 0
+    )
+    payload = b"MPF\x00" + b"II*\x00" + struct.pack("<I", 8) + ifd + entries
+    app = b"\xff\xe2" + (len(payload) + 2).to_bytes(2, "big") + payload
+    path.write_bytes(original[:insertion] + app + original[insertion:] + auxiliary)
+    inv = discover(path.parent)
+    dest = tmp_path / "out"
+    dest.mkdir()
+    if not success:
+        from raceframe.export.metadata import MetadataError
+
+        with load_image(inv.root, inv.images[0]) as loaded:
+            with pytest.raises(MetadataError):
+                export_image(
+                    inv.root,
+                    inv.images[0],
+                    loaded,
+                    Composition(CompositionStatus.CROPPED, Box(0, 0, 100, 70)),
+                    dest,
+                )
+        assert not list(dest.iterdir())
+        return
+    with load_image(inv.root, inv.images[0]) as loaded:
+        result = export_image(
+            inv.root,
+            inv.images[0],
+            loaded,
+            Composition(CompositionStatus.CROPPED, Box(0, 0, 100, 70)),
+            dest,
+        )
+    assert run_tool(["-b", "-PreviewImage", str(result.path)]) == auxiliary

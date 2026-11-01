@@ -43,3 +43,8 @@ No afirmar que SIGKILL o pérdida de energía permiten terminar limpiamente el i
 report lee sin cargar YOLO ni requerir modelo. --recover requiere que el trabajo esté inactivo,
 valida hashes de exportaciones preparadas y escribe manifest-recovered-<uuid>.json sin
 sobrescribir manifest.json ni reanudar procesamiento. No se incluye reanudación automática.
+
+Refinamiento focal: --framing-policy focal|context, --focal-threshold FLOAT,
+--target-occupancy FLOAT y --min-long-edge INT. Defaults focal, 70, 0.75 y 3000.
+Estos valores también se admiten en JSON. La focal es FocalLength real (no equivalente 35 mm).
+ExifTool es prerrequisito de preparación; cualquier pérdida de metadatos bloquea el recorte.

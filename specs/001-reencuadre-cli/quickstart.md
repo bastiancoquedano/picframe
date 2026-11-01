@@ -5,7 +5,8 @@ El agente puede operar estos pasos desde el chat, sin que el propietario use una
 1. `uv sync --locked --extra detector` para el entorno completo.
 2. `uv run --no-sync python scripts/prepare_model.py` prepara pesos oficiales explícitamente.
    En el Mac de desarrollo ya están preparados; el script verifica el archivo existente.
-3. `uv run --no-sync raceframe --version` comprueba el entry point.
+3. `uv run --no-sync python scripts/prepare_metadata_tool.py` prepara ExifTool local.
+   `uv run --no-sync raceframe --version` comprueba el entry point.
 4. Ejecutar lint/formato y `RACEFRAME_TEST_MODEL="$PWD/models/yolo11n.pt" uv run --no-sync pytest`.
 5. Con permiso sobre la carpeta privada elegida, ejecutar process con destino independiente.
 6. Revisar manifest.json y originales/salidas junto al propietario; no publicar fotografías ni rutas.

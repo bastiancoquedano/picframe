@@ -233,7 +233,7 @@ No introducir GUI, RAW, pose, dorsales ni reanudación durante estas tareas.
 ## Notes
 
 44 tareas: setup 3, base 7, US1 12, US2 4, US3 8, US4 4, transversal 6.
-No hay hooks before_tasks/after_tasks configurados. Implementación técnica completada: 42/44 tareas.
+No hay hooks before_tasks/after_tasks configurados. Implementación técnica completada: 45/47 tareas, incluido el refinamiento focal/metadatos.
 T042/T043 permanecen pendientes por indicación del propietario: evaluación y evento real
 se harán con su ayuda. No se considera el MVP validado fotográficamente.
 Las limitaciones de acceso a fotos reales se comunicarán al alcanzar T042/T043, sin fabricar resultados.
@@ -244,3 +244,9 @@ Implementación técnica CLI y comprobaciones automatizadas completas. T042 y T0
 sin marcar: el propietario respondió que realizará la prueba con sus fotos con ayuda del agente.
 No son bloqueos técnicos de código ni motivos para inventar fotografías/mediciones.
 La convergencia y aceptación completas requieren esa evidencia; mantenerla pendiente.
+
+## Phase 8: Refinamiento por evaluación de muestra
+
+- [X] T045 Preservar y verificar EXIF/MakerNotes y bloques APP/COM en src/raceframe/export/metadata.py y tests/integration/test_export.py, sin publicación ante pérdida, conforme a FR-028.
+- [X] T046 Implementar focal real, ocupación y límite de resolución en src/raceframe/core/cropping.py, src/raceframe/config.py y tests/unit/test_focal_framing.py, conforme a FR-026/FR-027.
+- [X] T047 Documentar preparación ExifTool, actualizar contrato/CLI y reprocesar la muestra a un trabajo nuevo con tiempos y comparación de metadatos, sin tocar originales; README.md y scripts/prepare_metadata_tool.py.

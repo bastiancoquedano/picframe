@@ -6,7 +6,7 @@ exporta a una carpeta independiente, sin modificar originales.
 
 ## Estado actual
 
-La implementación técnica del CLI está terminada: **42/44 tareas completadas**.
+La implementación técnica del CLI está terminada: **45/47 tareas completadas**.
 Las dos tareas pendientes son evaluación con 30–50 fotografías reales y medición de un evento
 completo; el propietario las realizará con ayuda del agente. Todavía no se declara el MVP
 fotográficamente validado. La interfaz gráfica pertenece a la siguiente fase del proyecto.
@@ -17,7 +17,7 @@ Incluye:
 - Selección explicable y copias byte por byte ante ambigüedad o baja confianza.
 - Modos conservador, equilibrado y cerrado; proporción original, 3:2 y 4:5.
 - Recortes que priorizan región del sujeto, márgenes factibles y conservación de contexto.
-- EXIF orientado, perfil ICC, calidad JPEG configurable y advertencias de metadatos no garantizados.
+- Conservación estricta EXIF/MakerNotes y APP/COM con verificación antes de publicar; ExifTool requerido.
 - Progreso, cancelación, errores por archivo, manifiesto JSON y recuperación de trabajos interrumpidos.
 - Publicación de archivos completos sin reemplazo; entradas originales abiertas solo para lectura.
 
@@ -38,6 +38,7 @@ Python 3.11.16 y uv. El Mac de desarrollo ya tiene dependencias y pesos preparad
 ```sh
 uv sync --locked --extra detector
 uv run --no-sync python scripts/prepare_model.py
+uv run --no-sync python scripts/prepare_metadata_tool.py
 uv run --no-sync raceframe --version
 ```
 
@@ -95,3 +96,25 @@ validación real; las casillas pendientes no se completan por pasar pruebas sint
 
 Repositorio: [bastiancoquedano/raceframe](https://github.com/bastiancoquedano/raceframe).
 No se incluye una licencia propia de distribución ni fotografías/modelos/entornos en Git.
+
+## Composición por focal y metadatos estrictos
+
+La política predeterminada usa focal EXIF real: >=70 mm busca 75 % de altura del sujeto;
+<70 mm o sin focal conserva contexto. No se aplica equivalencia de formato completo.
+Se mantiene cuerpo visible, proporción y lado largo mínimo inicial de 3000 px sin ampliar.
+Si el objetivo no es factible, se conserva seguridad/resolución y se registra la limitación.
+
+Opciones: --framing-policy focal|context, --focal-threshold 70, --target-occupancy 0.75,
+--min-long-edge 3000. Los cuatro valores también se admiten en configuración JSON.
+Las imágenes ambiguas siguen copiándose completas; focal no resuelve quién es el protagonista.
+
+ExifTool es obligatorio para verificar recortes. Se conservan metadatos originales, incluyendo
+MakerNotes; solo se actualizan orientación, dimensiones y miniatura. Si no puede verificarse,
+se registra error y no se publica ese recorte. La comparación no significa que los valores de
+captura (por ejemplo puntos AF originales) describan coordenadas recalculadas del recorte.
+
+Los JPEG Canon con previsualización MPF requieren conservar también su tráiler y referencias.
+La implementación prioriza esa conservación, incluso manteniendo relleno para respetar la
+estructura: el archivo recortado puede pesar parecido al original aunque tenga menos píxeles.
+Si la estructura no puede verificarse, no publica el recorte. Los valores de captura se
+conservan; las posiciones internas de datos y los campos derivados se actualizan cuando procede.

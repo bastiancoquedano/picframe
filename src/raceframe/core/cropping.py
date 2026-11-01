@@ -113,3 +113,77 @@ def calculate_crop(
             CompositionStatus.UNCHANGED, frame, protected, (*notes, "insufficient_improvement")
         )
     return result(CompositionStatus.CROPPED, best, protected, notes)
+
+
+def calculate_focal_crop(width, height, subject, config, focal_mm=None):
+    """Teleobjetivo: ocupación objetivo; angular/focal ausente: contexto."""
+    if (
+        subject is None
+        or config.framing_policy == "context"
+        or focal_mm is None
+        or focal_mm < config.focal_threshold
+    ):
+        return calculate_crop(width, height, subject, config)
+    if not subject.valid or not Box(0, 0, width, height).contains(subject):
+        raise ValueError("Caja fuera de imagen")
+    ratio = {"original": width / height, "3:2": 1.5, "4:5": 0.8}[config.aspect]
+    protected = Box(
+        floor(max(0, subject.x1 - subject.width * config.margin)),
+        floor(max(0, subject.y1 - subject.height * config.margin)),
+        ceil(min(width, subject.x2 + subject.width * config.margin)),
+        ceil(min(height, subject.y2 + subject.height * config.margin)),
+    )
+    max_width = min(width, ceil((height + 0.5) * ratio) - 1)
+    min_edge = min(config.min_long_edge, max(width, height))
+    start = max(1, ceil(protected.width), ceil(min_edge / max(1, 1 / ratio)))
+    best = None
+    best_key = None
+    for w in range(start, max_width + 1):
+        h = floor(w / ratio + 0.5)
+        if h < protected.height or h > height or max(w, h) < min_edge:
+            continue
+        xmin = max(0, ceil(protected.x2 - w))
+        xmax = min(width - w, floor(protected.x1))
+        ymin = max(0, ceil(protected.y2 - h))
+        ymax = min(height - h, floor(protected.y1))
+        if xmin > xmax or ymin > ymax:
+            continue
+        x = _nearest(subject.center[0] - w / 2, xmin, xmax)
+        y = _nearest(subject.center[1] - h / 2, ymin, ymax)
+        occupancy = subject.height / h
+        key = (
+            abs(occupancy - config.target_occupancy),
+            abs(subject.center[0] - (x + w / 2)) / w,
+            -w * h,
+            x,
+            y,
+        )
+        if best_key is None or key < best_key:
+            best_key = key
+            best = Box(x, y, x + w, y + h)
+    if best is None:
+        return Composition(
+            CompositionStatus.REVIEW_REQUIRED,
+            Box(0, 0, width, height),
+            protected,
+            ("focal_framing_infeasible",),
+            mode=config.mode,
+            requested_aspect=config.aspect,
+            effective_aspect="original",
+        )
+    notes = ["focal_subject_priority"]
+    if subject.height / best.height < config.target_occupancy - 0.05:
+        notes.append("occupancy_limited_by_resolution_or_safety")
+    return Composition(
+        status=CompositionStatus.UNCHANGED
+        if best == Box(0, 0, width, height)
+        else CompositionStatus.CROPPED,
+        crop=best,
+        protected=protected,
+        reasons=tuple(notes),
+        retained_area=best.area / (width * height),
+        margin_requested=config.margin,
+        mode=config.mode,
+        requested_aspect=config.aspect,
+        effective_aspect=config.aspect,
+    )

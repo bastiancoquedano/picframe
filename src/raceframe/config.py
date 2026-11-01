@@ -25,6 +25,10 @@ class Config:
     recursive: bool = False
     mode: str = "conservative"
     aspect: str = "original"
+    framing_policy: str = "focal"
+    focal_threshold: float = 70.0
+    target_occupancy: float = 0.75
+    min_long_edge: int = 3000
     margin: float = 0.08
     quality: int = 95
     device: str = "cpu"
@@ -48,6 +52,14 @@ class Config:
         ):
             if getattr(self, name) not in choices:
                 raise ValueError(f"{name} no válido")
+        if self.framing_policy not in ("focal", "context"):
+            raise ValueError("Política de encuadre inválida")
+        if not _number(self.focal_threshold, 1, 2000) or not _number(
+            self.target_occupancy, 0.1, 0.9
+        ):
+            raise ValueError("Umbral focal u ocupación inválidos")
+        if type(self.min_long_edge) is not int or self.min_long_edge < 1:
+            raise ValueError("La resolución mínima debe ser un entero positivo")
         if type(self.quality) is not int or not 1 <= self.quality <= 95:
             raise ValueError("quality debe ser un entero entre 1 y 95")
         if not _number(self.margin, 0, 0.5):

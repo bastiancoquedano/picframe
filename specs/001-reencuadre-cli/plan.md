@@ -185,3 +185,19 @@ Esta secuencia orienta la siguiente etapa; no reemplaza tasks.md ni autoriza omi
 
 Sin violaciones ni complejidad adicional que justificar. El diario se necesita para distinguir
 salidas completas de trabajos interrumpidos; no introduce una base de datos ni reanudación automática.
+
+## Refinamiento de metadatos y composición por focal — 2026-11-01
+
+Reemplazar exportación EXIF reconstruida selectivamente por conservación de APP/COM originales.
+ExifTool oficial 13.58 en .runtime o instalación del sistema actualiza solo los campos derivados.
+Comparar todos los valores extraídos, incluidos MakerNotes; comprobar literalmente los otros
+bloques APP/COM. Rechazar un recorte si la comparación falla o hay metadatos entre escaneos
+JPEG aún no soportados. No modificar originales. Las advertencias de pérdida de MakerNotes
+son comportamiento histórico sustituido por FR-028.
+
+Política por focal real: umbral >=70 mm, ocupación objetivo 0,75 y lado largo mínimo 3000 px,
+configurables. Geometría pura evalúa tamaños que contienen región protegida y minimiza distancia
+al objetivo de ocupación, luego desplazamiento del sujeto. Evitar recortar más una imagen que
+ya tiene protagonista grande. Para angular/focal desconocida reutilizar motor de contexto.
+El manifiesto añade focal, ocupación original/final y configuración efectiva. Esta política
+prima sobre la retención de área de los modos; --framing-policy context recupera el criterio previo.

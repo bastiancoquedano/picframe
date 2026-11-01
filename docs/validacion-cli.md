@@ -1,13 +1,13 @@
 # Validación técnica — 2026-11-01
 
-Implementación CLI completa, sin declarar validación fotográfica del MVP. 42/44 tareas;
+Implementación CLI completa, sin declarar validación fotográfica del MVP. 45/47 tareas;
 T042/T043 se reservan al propietario por su indicación del 2026-11-01.
 
 ## Evidencia
 
 - Las pruebas nuevas de exportación, procesamiento, selección, diario y modos se ejecutaron
   antes de sus implementaciones y reprodujeron los fallos esperados; luego pasaron.
-- Suite completa con pesos locales: 118 pruebas aprobadas, incluidas CPU real y offline.
+- Suite completa con pesos locales: 127 pruebas aprobadas, incluidas CPU real y offline.
 - La prueba offline lanza un proceso nuevo bajo sandbox-exec con deny network*, y además
   intercepta sockets/DNS: import, inferencia y exportación de un JPEG válido, junto a uno
   dañado, sin intentos de red. El código 1 por el archivo dañado es el resultado esperado.
@@ -18,8 +18,8 @@ T042/T043 se reservan al propietario por su indicación del 2026-11-01.
 - SIGINT real: salida 130, imagen activa completa y siguiente imagen no intentada.
 - Recuperación: bloqueo activo, cola truncada, secuencia inválida y hash erróneo comprobados;
   ningún archivo existente se sobrescribe para reparar un trabajo.
-- EXIF anidado, fecha, GPS, dimensiones, ICC y MakerNote no preservable comprobados.
-  Los recortes registran metadata_unverified: no se promete conservar todos los bloques de Canon.
+- EXIF anidado, fecha, GPS, dimensiones, ICC y MakerNotes conservados y comprobados.
+  Los recortes nuevos requieren metadata_verified; no se publican si la comprobación falla.
 - Ultralytics parchea Image.open globalmente; Raceframe usa JpegImageFile explícito para
   mantener lectura exclusiva de JPEG y evitar la carga inesperada de pi-heif ante una entrada dañada.
 - Dependencias reales resueltas e instaladas; pesos oficiales comprobados por SHA-256 y excluidos de Git.
@@ -72,3 +72,20 @@ Los archivos de prueba se encuentran bajo tests/unit o tests/integration.
 No hay fotografías privadas disponibles en este chat. La evaluación con 30–50 fotos y la
 medición con 2.000–3.500 fotos reales no se ejecutaron. Se harán con el propietario; no se
 simulan como completadas ni se confunden los tests con aceptación estética o rendimiento.
+
+## Refinamiento de la muestra — metadatos y focal
+
+Se sustituyó la pérdida advertida de MakerNotes por conservación estricta. Los bloques JPEG
+APP/COM originales se copian completos. ExifTool actualiza solo orientación, dimensiones,
+miniatura y referencias estructurales permitidas; se comparan los demás campos y los bloques.
+La previsualización MPF de Canon se verifica además binariamente. Una muestra sintética MPF
+cubre tanto la conservación correcta como el rechazo seguro cuando no es verificable.
+
+Pruebas de focal: 69,9 mm conserva contexto; 70 mm activa protagonismo; ausencia de focal
+conserva contexto; resolución mínima impide acercamiento excesivo. Objetivo aceptado: 75 %
+de altura (aproximadamente 70–80 %), sin ampliar ni cortar la región protegida.
+
+La muestra privada de 10 fotos se reprocesó a un trabajo nuevo: 10 exportadas, 0 errores,
+4 recortes verificados, 1 sin cambios y 5 copias para revisión por ambigüedad. Los originales
+conservaron sus hashes. Los datos y tiempos por archivo quedan solo en la carpeta privada.
+Este resultado no sustituye la valoración estética ni la muestra mayor de T042/T043.

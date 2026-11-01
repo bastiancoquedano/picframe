@@ -280,3 +280,22 @@ comparar regiones, contexto preservado y advertencias sin ejecutar un detector r
 - La evaluación de licencias, dependencias, parámetros, coordenadas y escrituras interrumpidas
   pertenece al plan técnico posterior. No se instalarán dependencias de visión ni descargarán pesos
   durante esta etapa de especificación.
+
+## Refinamiento aceptado — 2026-11-01
+
+El propietario exige conservación de metadatos, incluidos MakerNotes, y acepta protagonismo
+aproximado del 70–80 % de altura con límite de resolución. Después solicita focal real como regla.
+
+- **FR-026**: Con focal EXIF real >=70 mm, buscar sujeto al 75 % de altura (aproximadamente 70–80 %),
+  sujeto a integridad, márgenes, proporción y mínimo configurable de lado largo (inicial 3000 px).
+  Si el límite impide el objetivo, conservar resolución y registrar el motivo; no ampliar.
+- **FR-027**: Con focal <70 mm o ausente/inválida, conservar contexto; no usar equivalencia a 35 mm.
+  Ofrecer umbral, ocupación, límite de resolución y política de contexto configurables.
+- **FR-028**: Los recortes DEBEN conservar los metadatos originales: copiar bloques APP/COM,
+  incluyendo EXIF/MakerNotes/ICC/IPTC/XMP, y verificar los valores antes de publicar.
+  Solo se actualizan orientación, dimensiones y miniatura derivadas del recorte.
+  Un fallo o formato no verificable NO DEBE publicar una salida recortada con pérdidas.
+
+Aceptación: 69,9 mm usa contexto; 70 mm activa protagonismo; focal ausente conserva contexto.
+Un sujeto pequeño puede acercarse aunque ya esté centrado. Ningún límite de resolución se
+cumple inventando píxeles. MakerNotes y bloques desconocidos permanecen presentes; no basta advertir pérdida.
