@@ -30,7 +30,8 @@ por SIGINT. report devuelve 0 si lectura íntegra, 1 si trabajo interrumpido o e
 Destino: si se omite, hermano Raceframe_Output; crear subdirectorio job-<uuid> con exclusión.
 Resolver rutas antes de comprobar identidad/contención; rechazar destino igual a entrada,
 dentro de entrada recursiva o cualquier destino que pueda escribir un original del inventario.
-Por simplicidad, rechazar también directorios de salida dentro de entrada no recursiva.
+Por petición del propietario (2026-11-01), permitir un destino anidado cuando recursive=false:
+el inventario solo incluye JPEG del nivel superior y no vuelve a importar exportaciones.
 No seguir enlaces a directorios y omitir archivos enlazados fuera de raíz con advertencia.
 No sobrescribir salidas, inventarios ni informes de otros trabajos.
 

@@ -55,8 +55,8 @@ uv run --no-sync raceframe report /ruta/salida/job-UUID --recover
 ```
 
 Cada trabajo crea un subdirectorio exclusivo `job-UUID`. Por defecto, el destino propuesto es
-`Raceframe_Output`, hermano de la entrada. Se rechaza destino dentro de entrada, incluso sin
-recursión. Dentro del trabajo, nombres repetidos reciben sufijos; nunca se sobrescriben salidas.
+`Raceframe_Output`, hermano de la entrada. Se rechaza destino igual a entrada o dentro de una entrada recursiva.
+Sin recursión se permite una subcarpeta de salida, excluida del inventario. Dentro del trabajo, nombres repetidos reciben sufijos; nunca se sobrescriben salidas.
 Los volúmenes sin publicación exclusiva mediante enlaces duros se rechazan antes de exportar.
 
 Opciones: `--recursive`, `--mode conservative|balanced|tight`, `--aspect original|3:2|4:5`,

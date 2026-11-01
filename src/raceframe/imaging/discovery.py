@@ -17,8 +17,10 @@ def discover(source: Path, output: Path | None = None, *, recursive: bool = Fals
         raise ValueError("El origen debe ser una carpeta")
     requested_destination = Path(output) if output is not None else root.parent / "Raceframe_Output"
     destination = requested_destination.resolve()
-    if destination == root or destination.is_relative_to(root):
-        raise ValueError("El destino debe estar fuera de la carpeta de origen")
+    if destination == root or (recursive and destination.is_relative_to(root)):
+        raise ValueError(
+            "El destino no puede coincidir con el origen ni estar dentro de una entrada recursiva"
+        )
     if destination.exists() and not destination.is_dir():
         raise ValueError("El destino debe ser una carpeta")
     paths = []

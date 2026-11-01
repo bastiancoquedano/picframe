@@ -73,8 +73,8 @@ def _cropped_exif(loaded, size):
 
 def export_image(root, item, loaded, composition, destination, *, quality=95, before_publish=None):
     destination = Path(destination).resolve(strict=True)
-    if destination == root or destination.is_relative_to(root):
-        raise ValueError("La salida debe estar fuera del origen")
+    if destination == root:
+        raise ValueError("La salida no puede coincidir con el origen")
     width, height = loaded.image.size
     box = composition.crop
     if (

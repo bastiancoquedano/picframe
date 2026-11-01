@@ -26,7 +26,7 @@ def test_reject_unsafe_destinations(tmp_path, relative):
     root = tmp_path / "input"
     root.mkdir()
     with pytest.raises(ValueError):
-        discover(root, root / relative)
+        discover(root, root / relative, recursive=True)
 
 
 def test_symlink_paths_and_cycles(tmp_path):
@@ -88,3 +88,19 @@ def test_symlink_to_internal_file_is_revalidated(tmp_path):
     assert len(inv.images) == 2
     with open_input(inv.root, inv.images[1]) as handle:
         assert handle.read() == b"inside"
+
+
+def test_nested_destination_without_recursion_is_safe(tmp_path):
+    root = tmp_path / "input"
+    root.mkdir()
+    (root / "a.jpg").write_bytes(b"source")
+    output = root / "exportaciones"
+    output.mkdir()
+    (output / "old.jpg").write_bytes(b"existing")
+    inv = discover(root, output, recursive=False)
+    assert [i.relative_path for i in inv.images] == ["a.jpg"]
+    assert inv.destination == output
+    with pytest.raises(ValueError):
+        discover(root, root, recursive=False)
+    with pytest.raises(ValueError):
+        discover(root, output, recursive=True)

@@ -32,3 +32,14 @@ def test_empty_and_review(photo_factory, tmp_path, fake_detector):
 
     output = Path(result["manifest_path"]).parent / result["images"][0]["output_relative_path"]
     assert output.read_bytes() == before == path.read_bytes()
+
+
+def test_export_inside_source_is_excluded_on_next_run(photo_factory, fake_detector):
+    path = photo_factory("input/a.jpg")
+    before = path.read_bytes()
+    output = path.parent / "exportaciones"
+    first = process_folder(path.parent, output, detector=fake_detector)
+    second = process_folder(path.parent, output, detector=fake_detector)
+    assert first["summary"]["total"] == second["summary"]["total"] == 1
+    assert first["summary"]["exported"] == second["summary"]["exported"] == 1
+    assert path.read_bytes() == before
