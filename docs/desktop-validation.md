@@ -22,3 +22,15 @@ con sufijo numerado y conservación de carpeta existente verificados con fotos s
 El UUID de auditoría sigue separado del nombre visible; CLI conserva job-UUID por defecto.
 App 0.2.1 reconstruida; diagnóstico offline con inferencia CPU y exportación metadata_verified
 correctos. codesign --verify --deep --strict pasó. Se conserva firma ad hoc sin notarización.
+
+## Incremento 0.2.2 — filtro de revisión
+
+170 pruebas locales aprobadas, con RACEFRAME_TEST_MODEL para detector real. Ruff check y
+formato correctos. Casos Qt: pendientes y errores, filtro sin perder decisiones, avance tras
+selección manual, restauración automática, lista vacía con previews limpios, reanálisis y
+exportación del lote completo aunque haya filas ocultas. Errores de exportación simulados
+reaparecen en revisión y se actualizan al corregir la foto. El filtro no implica aprobación
+fotográfica ni completa T042/T043.
+Bundle 0.2.2 reconstruido: diagnóstico bajo deny network* confirmó review_filter_verified,
+inferencia CPU y exportación metadata_verified. Firma local verificada con codesign --verify
+--deep --strict. Sin cambios en alcance de distribución (ad hoc, sin notarización).

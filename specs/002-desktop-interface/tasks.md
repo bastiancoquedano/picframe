@@ -68,3 +68,9 @@ del incremento CLI continúan sin marcar; no se declaran resultados fotográfico
 - [X] T016 Probar nombre personalizado, colisiones, rechazo de rutas y caché UI conservado.
 - [X] T017 Implementar nombre opcional seguro en núcleo y campo de carpeta en ventana.
 - [X] T018 Documentar, ejecutar regresión, reconstruir app y publicar código.
+
+## Incremento: filtro de revisión
+
+- [X] T019 Probar clasificación, filtro/contador, selección vacía, corrección/restauración y exportación íntegra.
+- [X] T020 Implementar filtro en lista sin invalidar caché ni excluir fotos al exportar.
+- [X] T021 Documentar, validar regresión/bundle y publicar código.

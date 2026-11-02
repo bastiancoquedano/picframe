@@ -58,3 +58,12 @@ Añadir job_name opcional a process_folder; validar un componente de carpeta y r
 mkdir exclusivo, reintentando con (2), (3), etc. Mantener UUID separado del nombre visible.
 La UI propone Raceframe_fecha local y valida antes de exportar, sin invalidar decisiones.
 Probar exportación con nombre, colisiones, nombres inválidos y conservación del caché; reconstruir app.
+
+## Incremento autorizado: filtro de revisión
+
+Usar un criterio puro de revisión sobre las filas existentes, sin cambiar motor/contratos
+de manifiesto. Combo sobre QListWidget con setHidden; conservar records íntegros para exportar.
+Mantener selección visible o avanzar al siguiente pendiente, limpiar preview sin coincidencias.
+Usar errores del último resultado para filtrar tras exportación; al corregir una foto descartar
+su estado visual exportado obsoleto. Pruebas Qt con mezcla de casos, corrección/restauración,
+análisis progresivo y exportación íntegra; reconstruir bundle y verificar offline.

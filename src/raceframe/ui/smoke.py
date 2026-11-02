@@ -50,12 +50,21 @@ def run_smoke(report_path):
             analysis_overrides={row["image_id"]: row},
         )
         window = MainWindow()
+        window.review_filter.setCurrentIndex(1)
+        window.on_record(row)
+        window.apply_review_filter()
+        if not window.photo_list.item(0).isHidden() or window.selected_id() is not None:
+            raise RuntimeError("Falló filtro de revisión del bundle")
+        window.review_filter.setCurrentIndex(0)
+        if window.photo_list.item(0).isHidden() or len(window.records) != 1:
+            raise RuntimeError("El filtro alteró el análisis del bundle")
         window.show()
         app.processEvents()
         window.close()
         record = {
             "bundle": True,
             "qt_window_created": True,
+            "review_filter_verified": True,
             "real_inference_cpu": True,
             "status": result["status"],
             "summary": result["summary"],

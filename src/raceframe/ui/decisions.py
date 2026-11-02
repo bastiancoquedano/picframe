@@ -8,6 +8,15 @@ from raceframe.core.cropping import calculate_focal_crop
 from raceframe.core.models import Box
 
 
+def needs_review(row):
+    return (
+        bool(row.get("error"))
+        or row.get("operation_status") == "error"
+        or row.get("selection_status") != "selected"
+        or (row.get("composition") or {}).get("status") not in {"cropped", "unchanged"}
+    )
+
+
 def aspect_box(start, end, size, ratio):
     width, height = size
     ax, ay = (max(0, min(start[0], width)), max(0, min(start[1], height)))

@@ -33,7 +33,7 @@ from raceframe.core.processing import process_folder
 from raceframe.export.directory import validate_job_name
 from raceframe.imaging.discovery import discover
 from raceframe.imaging.loader import load_image
-from raceframe.ui.decisions import manual_crop, select_detection
+from raceframe.ui.decisions import manual_crop, needs_review, select_detection
 from raceframe.ui.preview import PhotoView
 from raceframe.ui.resources import model_path
 from raceframe.ui.workers import TaskWorker, analyze_folder
@@ -267,11 +267,24 @@ class MainWindow(QMainWindow):
         actions.addWidget(self.results_button)
         root.addLayout(actions)
         splitter = QSplitter(Qt.Orientation.Horizontal)
+        list_panel = QWidget()
+        list_layout = QVBoxLayout(list_panel)
+        list_layout.setContentsMargins(0, 0, 0, 0)
+        self.review_filter = self.combo([("Todas", "all"), ("Necesitan revisión", "review")])
+        self.review_filter.setToolTip(
+            "Filtra la lista. Exportar resultados siempre incluye el lote completo."
+        )
+        self.filter_count = QLabel("Sin fotografías analizadas")
+        self.filter_count.setWordWrap(True)
+        self.filter_count.setObjectName("muted")
+        list_layout.addWidget(self.review_filter)
+        list_layout.addWidget(self.filter_count)
         self.photo_list = QListWidget()
         self.photo_list.setMinimumWidth(205)
         self.photo_list.setMaximumWidth(300)
         self.photo_list.currentItemChanged.connect(lambda *a: self.show_selected())
-        splitter.addWidget(self.photo_list)
+        list_layout.addWidget(self.photo_list, 1)
+        splitter.addWidget(list_panel)
         preview_panel = QWidget()
         preview_layout = QVBoxLayout(preview_panel)
         preview_layout.setContentsMargins(0, 0, 0, 0)
@@ -344,6 +357,7 @@ class MainWindow(QMainWindow):
         self.model_edit.textChanged.connect(self.invalidate)
         self.source_edit.editingFinished.connect(self.source_edited)
         self.output_edit.textChanged.connect(self.invalidate)
+        self.review_filter.currentIndexChanged.connect(self.apply_review_filter)
         self.update_controls()
 
     @staticmethod
@@ -433,6 +447,7 @@ class MainWindow(QMainWindow):
         self.output_states = {}
         self.inventory = None
         self.photo_list.clear()
+        self.apply_review_filter()
         self.preview_image = None
         self.preview_id = None
         self.original_view.clear_image()
@@ -449,7 +464,7 @@ class MainWindow(QMainWindow):
         self.cancel_button.setEnabled(busy and not self.worker.cancel.is_set() if busy else False)
         self.results_button.setEnabled(self.last_result is not None)
         for widget in (self.person_combo, self.manual_button, self.reset_button):
-            widget.setEnabled(not busy and bool(self.records))
+            widget.setEnabled(not busy and self.selected_id() is not None)
 
     def launch(self, function, callback):
         worker = TaskWorker(function, self)
@@ -511,14 +526,12 @@ class MainWindow(QMainWindow):
         self.detector_key = self.pending_detector_key
         self.analysis_complete = not value["cancelled"]
         count = len(value["records"])
-        review = sum(row["selection_status"] != "selected" for row in value["records"])
+        review = sum(needs_review(row) for row in value["records"])
         self.status.setText(
             f"{'Análisis cancelado' if value['cancelled'] else 'Análisis listo'}"
             f" · {count} fotografías · {review} para revisar"
         )
-        if self.photo_list.count():
-            self.photo_list.setCurrentRow(0)
-            self.show_selected()
+        self.apply_review_filter()
         self.update_controls()
 
     def start_export(self):
@@ -567,6 +580,7 @@ class MainWindow(QMainWindow):
             f"{label} · {summary['exported']} exportadas · {summary['cropped']} recortadas"
             f" · {summary['review_required']} para revisar · {summary['errors']} errores"
         )
+        self.apply_review_filter()
         self.update_controls()
 
     @staticmethod
@@ -594,9 +608,59 @@ class MainWindow(QMainWindow):
         self.records[row["image_id"]] = row
         item = QListWidgetItem(self.caption(row))
         item.setData(Qt.ItemDataRole.UserRole, row["image_id"])
-        if row["selection_status"] != "selected":
-            item.setForeground(QColor("#edb965"))
         self.photo_list.addItem(item)
+        self.apply_review_filter(select=False)
+
+    def apply_review_filter(self, *unused, select=True):
+        only_review = self.review_filter.currentData() == "review"
+        current = self.photo_list.currentItem()
+        current_index = self.photo_list.currentRow()
+        visible = []
+        review_count = 0
+        self.photo_list.blockSignals(True)
+        for index in range(self.photo_list.count()):
+            item = self.photo_list.item(index)
+            image_id = item.data(Qt.ItemDataRole.UserRole)
+            row = self.output_states.get(image_id, self.records[image_id])
+            review = needs_review(row)
+            review_count += review
+            item.setHidden(only_review and not review)
+            item.setForeground(QColor("#edb965" if review else "#e9eff5"))
+            if not item.isHidden():
+                visible.append((index, item))
+        if select:
+            if current is None or current.isHidden():
+                following = next((item for i, item in visible if i >= current_index), None)
+                current = following or (visible[0][1] if visible else None)
+                if current is None:
+                    self.photo_list.setCurrentRow(-1)
+                else:
+                    self.photo_list.setCurrentItem(current)
+        self.photo_list.blockSignals(False)
+        total = self.photo_list.count()
+        if not total:
+            label = "Sin fotografías analizadas"
+        elif only_review and not visible:
+            label = f"No hay fotografías que necesiten revisión · 0 de {total}"
+        else:
+            label = f"Mostrando {len(visible)} de {total} · {review_count} para revisar"
+        self.filter_count.setText(label)
+        if select:
+            self.show_selected()
+            self.update_controls()
+
+    def clear_preview(self):
+        self.preview_id = None
+        self.preview_image = None
+        self.original_view.clear_image()
+        self.result_view.clear_image()
+        self.person_combo.clear()
+        self.manual_button.setChecked(False)
+
+    def refresh_decision(self, image_id):
+        self.output_states.pop(image_id, None)
+        self.photo_list.currentItem().setText(self.caption(self.records[image_id]))
+        self.apply_review_filter()
 
     def on_progress(self, n, total):
         self.progress.setRange(0, max(1, total))
@@ -630,11 +694,12 @@ class MainWindow(QMainWindow):
 
     def selected_id(self):
         item = self.photo_list.currentItem()
-        return None if item is None else item.data(Qt.ItemDataRole.UserRole)
+        return None if item is None or item.isHidden() else item.data(Qt.ItemDataRole.UserRole)
 
     def show_selected(self):
         image_id = self.selected_id()
         if image_id is None or self.inventory is None:
+            self.clear_preview()
             return
         row = self.records.get(image_id)
         if row is None:
@@ -685,7 +750,7 @@ class MainWindow(QMainWindow):
             self.person_combo.blockSignals(False)
         except Exception as exc:
             self.status.setText("No se puede previsualizar: " + str(exc))
-            self.result_view.clear_image()
+            self.clear_preview()
 
     def person_activated(self, index):
         person = self.person_combo.itemData(index)
@@ -702,8 +767,7 @@ class MainWindow(QMainWindow):
             self.records[image_id] = select_detection(
                 self.records[image_id], detection_id, self.analysis_config
             )
-            self.photo_list.currentItem().setText(self.caption(self.records[image_id]))
-            self.show_selected()
+            self.refresh_decision(image_id)
             self.status.setText(
                 "Protagonista elegido manualmente; revisa el resultado antes de exportar."
             )
@@ -716,7 +780,7 @@ class MainWindow(QMainWindow):
             return
         try:
             self.records[image_id] = manual_crop(self.records[image_id], box, self.analysis_config)
-            self.photo_list.currentItem().setText(self.caption(self.records[image_id]))
+            self.refresh_decision(image_id)
             self.status.setText("Recorte manual aplicado a esta fotografía.")
         except ValueError as exc:
             self.status.setText(str(exc))
@@ -736,8 +800,7 @@ class MainWindow(QMainWindow):
             return
         if image_id in self.automatic_records:
             self.records[image_id] = deepcopy(self.automatic_records[image_id])
-            self.photo_list.currentItem().setText(self.caption(self.records[image_id]))
-            self.show_selected()
+            self.refresh_decision(image_id)
             self.status.setText("Propuesta automática restaurada para esta fotografía.")
 
     def open_results(self):

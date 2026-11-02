@@ -95,3 +95,13 @@ FR-010: Permitir nombrar la subcarpeta del trabajo desde la ventana, con propues
 Se rechazan nombres vacíos, rutas, caracteres de control y nombres reservados; las colisiones
 crean sufijos numerados sin sobrescribir. El UUID se conserva internamente para auditoría.
 Cambiar solo este nombre no invalida el análisis ni las correcciones. CLI conserva su destino actual.
+
+## Incremento: filtro de revisión (2026-11-01)
+
+FR-011: Permitir alternar Todas / Necesitan revisión y mostrar conteos. Incluir selección
+incierta/ausente, composición review_required y errores de análisis/exportación.
+Filtrar solo la lista: conservar decisiones, caché y exportación del lote completo.
+Al resolver la foto visible, avanzar a la siguiente pendiente. Sin coincidencias, limpiar
+previews y deshabilitar edición; mostrar que no hay fotos pendientes. Todas permite volver
+a cualquier foto corregida. Actualizar filtro/conteos durante análisis, correcciones y exportación.
+No añade persistencia de sesiones ni perfiles en este incremento.

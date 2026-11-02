@@ -19,3 +19,7 @@ Perl del Mac se invoca con ruta absoluta. Sin descargas durante uso ni filtros p
 
 Nombre de carpeta: componente opcional job_name del núcleo; UI lo exige y propone Raceframe_YYYY-MM-DD.
 Se añade bajo Destino, con sufijo numérico si existe. No altera Config ni la caché. job_id sigue siendo UUID.
+
+Filtro de revisión: estado visual Todas / Necesitan revisión, independiente de Config y records.
+Errores, selección distinta de selected o composición sin solución válida requieren revisión.
+Filtrar no limita exportación; actualizar contador y selección visible, limpiar previews si vacía.

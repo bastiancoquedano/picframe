@@ -1,4 +1,4 @@
-# Raceframe de escritorio — 0.2.1
+# Raceframe de escritorio — 0.2.2
 
 ## Abrir en este Mac
 
@@ -13,6 +13,11 @@ en Finder. Incluye modelo y ExifTool; no necesita terminal ni red durante el pro
    resolución mínima, dispositivo y modelo local.
 3. Pulsar **Analizar fotografías**. No se exportan JPEG todavía.
 4. Elegir una foto de la lista. A la izquierda se ven personas y recorte; a la derecha, el resultado.
+   Sobre la lista, **Necesitan revisión** muestra las fotos ambiguas, sin protagonista o
+   con errores; **Todas** recupera el lote completo. El contador muestra visibles y pendientes.
+   Elegir una persona válida retira la foto del filtro y avanza a la siguiente pendiente;
+   para ajustar después su recorte, vuelve a **Todas**. Si no quedan pendientes, se limpian
+   las vistas previas. El filtro conserva los ajustes y **no limita la exportación**.
 5. Para una ambigua, elegir otra persona en la lista desplegable o pulsar su caja en el original.
 6. **Dibujar recorte** permite arrastrar en el original. Se conserva proporción y se rechaza un
    rectángulo que excluya al sujeto protegido o incumpla la resolución mínima.
@@ -57,5 +62,5 @@ El bundle, pesos, herramientas y resultados privados están fuera de Git.
 Pruebas Qt offscreen cubren selección, drag real, recorte manual exportado, invalidación,
 progreso y cierre cooperativo. Detector real en QThread mantiene eventos de interfaz activos.
 El diagnóstico del bundle ejecutado bajo deny network* verificó inferencia CPU y exportación
-con metadata_verified; después se comprobó la ventana nativa Raceframe 0.2.1.
+con metadata_verified; después se comprobó la ventana nativa Raceframe 0.2.2.
 La muestra pequeña no completa las tareas fotográficas y de volumen del CLI.
