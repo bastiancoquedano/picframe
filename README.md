@@ -6,7 +6,7 @@ exporta a una carpeta independiente, sin modificar originales.
 
 ## Estado actual
 
-**Raceframe 0.2.0 ya tiene interfaz de escritorio**, además del CLI.
+**Raceframe 0.2.1 ya tiene interfaz de escritorio**, además del CLI.
 La aplicación local está en `dist/Raceframe.app`: abrir con doble clic en Finder.
 Permite elegir carpetas, analizar en segundo plano, comparar original/recorte, seleccionar
 otro corredor, dibujar un recorte seguro y exportar con los metadatos verificados.

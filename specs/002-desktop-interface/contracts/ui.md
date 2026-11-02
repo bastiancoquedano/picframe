@@ -16,3 +16,6 @@ Se rechaza ROI fuera del lienzo, con proporción incorrecta, menor al límite o 
 Entradas: raceframe-gui y python -m raceframe.ui. CLI anterior sin cambios incompatibles.
 Bundle: recursos en directorio PyInstaller; resolver sin cwd/PATH de shell. ExifTool incluye lib;
 Perl del Mac se invoca con ruta absoluta. Sin descargas durante uso ni filtros por orientación.
+
+Nombre de carpeta: componente opcional job_name del núcleo; UI lo exige y propone Raceframe_YYYY-MM-DD.
+Se añade bajo Destino, con sufijo numérico si existe. No altera Config ni la caché. job_id sigue siendo UUID.

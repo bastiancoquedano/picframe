@@ -13,3 +13,12 @@
 
 Las pruebas de 30–50 fotos y el evento de 2.000–3.500 siguen pendientes. Las pruebas ya
 revisadas sirven para avanzar a interfaz, pero no se presentan como esas mediciones completas.
+
+## Incremento 0.2.1 — nombre de carpeta
+
+159 pruebas locales aprobadas (incluyendo detector real), ruff check y formato correctos.
+Exportación Qt con nombre personalizado, rechazo de rutas sin perder análisis, colisión
+con sufijo numerado y conservación de carpeta existente verificados con fotos sintéticas.
+El UUID de auditoría sigue separado del nombre visible; CLI conserva job-UUID por defecto.
+App 0.2.1 reconstruida; diagnóstico offline con inferencia CPU y exportación metadata_verified
+correctos. codesign --verify --deep --strict pasó. Se conserva firma ad hoc sin notarización.

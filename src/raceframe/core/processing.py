@@ -16,6 +16,7 @@ from raceframe.config import Config
 from raceframe.core.cropping import calculate_focal_crop
 from raceframe.core.models import Box, Composition, SelectionStatus
 from raceframe.core.selection import select_subject
+from raceframe.export.directory import create_job_directory
 from raceframe.export.jpeg import export_image, validate_volume
 from raceframe.export.manifest import AuditError, Journal, atomic_json, summarize
 from raceframe.imaging.discovery import discover
@@ -174,6 +175,7 @@ def process_folder(
     progress=None,
     cancel=None,
     analysis_overrides=None,
+    job_name=None,
 ):
     config = config or Config()
     inventory = discover(
@@ -183,14 +185,13 @@ def process_folder(
         analysis_overrides
     ):
         raise ValueError("El contenido de la carpeta cambió; vuelve a analizar antes de exportar")
-    inventory.destination.mkdir(parents=True, exist_ok=True)
-    destination = inventory.destination / f"job-{uuid4()}"
-    destination.mkdir()
+    job_id = str(uuid4())
+    destination = create_job_directory(inventory.destination, job_name, job_id)
     validate_volume(destination)
     started = monotonic()
     header = {
         "schema_version": 1,
-        "job_id": destination.name[4:],
+        "job_id": job_id,
         "created_at": datetime.now(UTC).isoformat(),
         "finished_at": None,
         "status": "running",

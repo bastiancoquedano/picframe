@@ -1,6 +1,7 @@
 """Ventana de revisión y exportación local de Raceframe."""
 
 from copy import deepcopy
+from datetime import date
 from pathlib import Path
 from time import monotonic
 
@@ -29,6 +30,7 @@ from PySide6.QtWidgets import (
 from raceframe import __version__
 from raceframe.config import Config
 from raceframe.core.processing import process_folder
+from raceframe.export.directory import validate_job_name
 from raceframe.imaging.discovery import discover
 from raceframe.imaging.loader import load_image
 from raceframe.ui.decisions import manual_crop, select_detection
@@ -168,11 +170,18 @@ class MainWindow(QMainWindow):
             paths.addWidget(QLabel(label), i, 0)
             paths.addWidget(edit, i, 1)
             paths.addWidget(button, i, 2)
+        self.folder_name_edit = QLineEdit(f"Raceframe_{date.today().isoformat()}")
+        self.folder_name_edit.setPlaceholderText("Por ejemplo: Carrera del domingo")
+        self.folder_name_edit.setToolTip(
+            "Se creará dentro del destino. Si existe, se añadirá (2), (3), etc."
+        )
+        paths.addWidget(QLabel("Nombre de carpeta"), 2, 0)
+        paths.addWidget(self.folder_name_edit, 2, 1, 1, 2)
         self.recursive = QCheckBox("Incluir subcarpetas")
         self.count_label = QLabel("Sin carpeta seleccionada")
         self.count_label.setObjectName("muted")
-        paths.addWidget(self.recursive, 2, 1)
-        paths.addWidget(self.count_label, 2, 2)
+        paths.addWidget(self.recursive, 3, 1)
+        paths.addWidget(self.count_label, 3, 2)
         root.addWidget(self.paths_panel)
         self.settings_panel = QGroupBox("Encuadre")
         settings = QVBoxLayout(self.settings_panel)
@@ -515,6 +524,11 @@ class MainWindow(QMainWindow):
     def start_export(self):
         if self.worker is not None or not self.analysis_complete:
             return
+        try:
+            job_name = validate_job_name(self.folder_name_edit.text())
+        except ValueError as exc:
+            self.on_failed(str(exc))
+            return
         source = self.inventory.root
         output = self.inventory.destination
         config = self.analysis_config
@@ -530,6 +544,7 @@ class MainWindow(QMainWindow):
                 progress=progress,
                 cancel=cancel,
                 analysis_overrides=overrides,
+                job_name=job_name,
             ),
             self.export_done,
         )

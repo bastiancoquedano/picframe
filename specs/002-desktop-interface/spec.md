@@ -88,3 +88,10 @@ Como fotógrafo quiero exportar, ver progreso y cancelar sin dañar originales o
 - Un trabajo activo a la vez y una fotografía decodificada para previsualización; no almacenar todas las imágenes en memoria.
 - La muestra revisada orienta la GUI; 30–50 fotos y el lote de 2.000–3.500 siguen pendientes y no se declaran validados.
 - Uso personal en este Mac; firma comercial y notarización pertenecen a distribución posterior.
+
+## Incremento: nombre de exportación (2026-11-01)
+
+FR-010: Permitir nombrar la subcarpeta del trabajo desde la ventana, con propuesta legible por fecha.
+Se rechazan nombres vacíos, rutas, caracteres de control y nombres reservados; las colisiones
+crean sufijos numerados sin sobrescribir. El UUID se conserva internamente para auditoría.
+Cambiar solo este nombre no invalida el análisis ni las correcciones. CLI conserva su destino actual.

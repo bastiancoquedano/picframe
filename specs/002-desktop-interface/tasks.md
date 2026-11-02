@@ -62,3 +62,9 @@ Sin hooks de extensión configurados. Formato y cobertura revisados antes de imp
 15 tareas completadas. Pruebas de interfaz, regresión CLI y diagnóstico de bundle offline
 realizados; ventana nativa observada. Ver docs/desktop-validation.md. Los pendientes T042/T043
 del incremento CLI continúan sin marcar; no se declaran resultados fotográficos no evaluados.
+
+## Incremento: carpeta legible
+
+- [X] T016 Probar nombre personalizado, colisiones, rechazo de rutas y caché UI conservado.
+- [X] T017 Implementar nombre opcional seguro en núcleo y campo de carpeta en ventana.
+- [X] T018 Documentar, ejecutar regresión, reconstruir app y publicar código.

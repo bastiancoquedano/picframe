@@ -51,3 +51,10 @@ una vez y usado secuencialmente. Al cerrar durante tarea se cancela y se espera 
 ## Complexity Tracking
 
 Sin excepciones. No introducir servidor, base de datos ni motor paralelo de recorte.
+
+## Incremento autorizado: carpeta legible
+
+Añadir job_name opcional a process_folder; validar un componente de carpeta y reservarlo con
+mkdir exclusivo, reintentando con (2), (3), etc. Mantener UUID separado del nombre visible.
+La UI propone Raceframe_fecha local y valida antes de exportar, sin invalidar decisiones.
+Probar exportación con nombre, colisiones, nombres inválidos y conservación del caché; reconstruir app.

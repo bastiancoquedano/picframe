@@ -60,3 +60,38 @@ def test_manual_crop_is_the_exported_decision(qtbot, photo_factory, tmp_path, fa
     with Image.open(Path(result["manifest_path"]).parent / row["output_relative_path"]) as output:
         assert output.size == (760, 1140)
         assert output.getexif()[271] == "Synthetic Camera"
+
+
+def test_named_export_keeps_analysis_and_preserves_existing_folder(
+    qtbot, photo_factory, tmp_path, fake_detector
+):
+    from pathlib import Path
+
+    path = photo_factory("input/a.jpg")
+    model = tmp_path / "fake.pt"
+    model.write_bytes(b"fake")
+    window = MainWindow(detector_factory=lambda *a: fake_detector, initial_model=model)
+    qtbot.addWidget(window)
+    window.set_source(path.parent)
+    output = tmp_path / "out"
+    window.output_edit.setText(str(output))
+    window.start_analysis()
+    qtbot.waitUntil(lambda: window.worker is None, timeout=5000)
+    existing = output / "Carrera del domingo"
+    existing.mkdir(parents=True)
+    marker = existing / "keep.txt"
+    marker.write_text("conservar")
+    window.folder_name_edit.setText("../no permitido")
+    window.start_export()
+    assert window.worker is None
+    assert window.analysis_complete
+    assert not (output / "no permitido").exists()
+    assert "sin rutas" in window.status.text()
+    window.folder_name_edit.setText("Carrera del domingo")
+    assert window.analysis_complete
+    window.start_export()
+    qtbot.waitUntil(lambda: window.worker is None, timeout=5000)
+    assert Path(window.last_result["manifest_path"]).parent.name == "Carrera del domingo (2)"
+    assert marker.read_text() == "conservar"
+    assert window.last_result["summary"]["exported"] == 1
+    assert fake_detector.calls == 1

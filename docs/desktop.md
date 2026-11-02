@@ -1,11 +1,13 @@
-# Raceframe de escritorio — 0.2.0
+# Raceframe de escritorio — 0.2.1
 
 ## Abrir en este Mac
 
 La aplicación preparada está en `dist/Raceframe.app`, dentro del proyecto. Abrirla con doble clic
 en Finder. Incluye modelo y ExifTool; no necesita terminal ni red durante el procesamiento.
 
-1. Elegir origen y destino. Sin subcarpetas propone `exportaciones` dentro del origen;
+1. Elegir origen y destino. En **Nombre de carpeta** escribir cómo se llamará el trabajo
+   (por defecto `Raceframe_AAAA-MM-DD`). Se crea dentro del destino; si ya existe, se añade
+   `(2)`, `(3)`, etc., sin sobrescribir. Cambiar solo el nombre conserva el análisis. Sin subcarpetas propone `exportaciones` dentro del origen;
    con subcarpetas el destino debe quedar fuera del árbol de entrada.
 2. Ajustar modo, proporción, margen y composición. Más opciones permite calidad, focal,
    resolución mínima, dispositivo y modelo local.
@@ -55,5 +57,5 @@ El bundle, pesos, herramientas y resultados privados están fuera de Git.
 Pruebas Qt offscreen cubren selección, drag real, recorte manual exportado, invalidación,
 progreso y cierre cooperativo. Detector real en QThread mantiene eventos de interfaz activos.
 El diagnóstico del bundle ejecutado bajo deny network* verificó inferencia CPU y exportación
-con metadata_verified; después se comprobó la ventana nativa Raceframe 0.2.0.
+con metadata_verified; después se comprobó la ventana nativa Raceframe 0.2.1.
 La muestra pequeña no completa las tareas fotográficas y de volumen del CLI.

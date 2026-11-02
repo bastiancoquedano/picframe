@@ -62,7 +62,7 @@ app = BUNDLE(
     info_plist={
         "CFBundleName": "Raceframe",
         "CFBundleDisplayName": "Raceframe",
-        "CFBundleShortVersionString": "0.2.0",
+        "CFBundleShortVersionString": "0.2.1",
         "NSHighResolutionCapable": True,
     },
 )
