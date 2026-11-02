@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 
-from raceframe.core.categories import CATEGORIES
+from raceframe.core.categories import target_classes
 from raceframe.core.models import Box
 
 
@@ -59,7 +59,7 @@ def build_candidates(detections, config):
     candidates = []
     associations = []
     for detection in detections:
-        if detection.class_name not in CATEGORIES[config.subject_category]:
+        if detection.class_name not in target_classes(config.active_categories):
             continue
         linked = sorted(links.get(detection.detection_id, ()))
         ids = tuple(sorted({detection.detection_id, *linked}))
@@ -77,4 +77,16 @@ def build_candidates(detections, config):
                     "reason": "ambiguous_geometry" if ambiguous else "unique_mutual_geometry",
                 }
             )
-    return candidates, associations
+    # Si dos categorías contienen los mismos miembros, el conjunto compite una sola vez.
+    unique = {}
+    for candidate in candidates:
+        existing = unique.get(candidate.member_ids)
+        preference = (by_id[candidate.primary_id].class_name != "person", candidate.primary_id)
+        if existing is None or preference < (
+            by_id[existing.primary_id].class_name != "person",
+            existing.primary_id,
+        ):
+            unique[candidate.member_ids] = candidate
+    candidates = sorted(unique.values(), key=lambda candidate: candidate.primary_id)
+    unique_associations = {tuple(a["member_ids"]): a for a in associations}
+    return candidates, list(unique_associations.values())

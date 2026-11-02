@@ -43,7 +43,17 @@ def select_subject(detections, width, height, config=None, *, forced_id=None):
         candidate = by_primary.get(d.detection_id)
         if candidate is None:
             scored.append(
-                replace(d, score=None, eligible=False, reasons=(*d.reasons, "category_filtered"))
+                replace(
+                    d,
+                    score=None,
+                    eligible=False,
+                    reasons=(
+                        *d.reasons,
+                        "associated_member"
+                        if any(d.detection_id in c.member_ids for c in candidates)
+                        else "category_filtered",
+                    ),
+                )
             )
             continue
         box = candidate.box
@@ -109,7 +119,7 @@ def select_subject(detections, width, height, config=None, *, forced_id=None):
             if rejected
             else (
                 SelectionStatus.NO_PERSON
-                if config.subject_category == "people"
+                if config.active_categories == ("people",)
                 else SelectionStatus.NO_SUBJECT
             )
         )

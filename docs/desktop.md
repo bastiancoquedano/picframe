@@ -1,4 +1,4 @@
-# Picframe de escritorio — 0.3.0
+# Picframe de escritorio — 0.3.1
 
 ## Abrir en este Mac
 
@@ -68,10 +68,14 @@ La muestra pequeña no completa las tareas fotográficas y de volumen del CLI.
 
 ## Categoría y selección
 
-En **Encuadre → Sujetos** elegir Personas, Animales o Vehículos. En **Selección**:
+En **Encuadre → Sujetos**, **Automático** viene activado: busca personas, animales y vehículos
+en cada foto del lote. No necesitas cambiar opciones entre imágenes.
+Si quieres limitar la búsqueda, desactiva Automático y marca cualquier combinación de casillas:
+Personas, Animales y Vehículos. Debe quedar al menos una marcada.
+En **Selección**:
 - **Protagonista dominante** (inicial): área claramente mayor, al menos 1,5 veces la segunda.
   Confianza/área mínimas siguen siendo necesarias. Más opciones permite cambiar Ventaja de tamaño.
-- **Conservar grupo**: unión de candidatos confiables de la categoría elegida; si no cabe, revisión.
+- **Conservar grupo**: unión de candidatos confiables de las categorías activas; si no cabe, revisión.
 - **Revisión manual**: puntuación conservadora previa; permite elegir entre candidatos inciertos.
 
 Personas puede proteger también bicicletas, motos o caballos asociados geométricamente.
@@ -86,6 +90,10 @@ Tercio superior solo persona individual. Conjuntos, grupos y objetos se encuadra
 limitante con focal larga; con focal corta/ausente se conserva contexto. Integridad y resolución
 tienen prioridad; una escena sin margen de recorte puede conservarse completa.
 
-Cambiar categoría, estrategia o ventaja de tamaño exige volver a analizar. Filtro Necesitan
+Cambiar Automático, casillas, estrategia o ventaja de tamaño exige volver a analizar. Filtro Necesitan
 revisión incluye las incertidumbres nuevas. Un sujeto grande cercano aún podría ser un espectador;
 revise la propuesta antes de exportar. Precisión de las asociaciones pendiente de evaluación real.
+
+Con categorías combinadas, un conjunto persona+bicicleta/caballo cuenta una sola vez.
+Desde CLI, --auto-subjects activa las tres y --subject-categories people animals permite
+combinaciones. --subject-category singular sigue disponible para configuraciones previas.

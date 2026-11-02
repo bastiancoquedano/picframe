@@ -117,7 +117,7 @@ class YoloDetector:
         }
 
     def _predict(self, image):
-        classes = detection_classes(self.config.subject_category)
+        classes = detection_classes(self.config.active_categories)
         names = self.backend.model.names
         if any(names[i] != CLASSES[i] for i in classes if i in names) or any(
             i not in names for i in classes
@@ -146,7 +146,7 @@ class YoloDetector:
             boxes.xyxy.tolist(), boxes.conf.tolist(), boxes.cls.tolist(), strict=True
         ):
             class_id = int(class_id)
-            if class_id in detection_classes(self.config.subject_category):
+            if class_id in detection_classes(self.config.active_categories):
                 detections.append(
                     Detection(
                         len(detections),

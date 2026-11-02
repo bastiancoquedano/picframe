@@ -55,10 +55,20 @@ LABELS = dict(
 )
 
 
-def detection_classes(category):
-    names = CATEGORIES[category] | (
-        {"bicycle", "motorcycle", "horse"} if category == "people" else {"person"}
-    )
+def target_classes(categories):
+    if isinstance(categories, str):
+        categories = (categories,)
+    return set().union(*(CATEGORIES[category] for category in categories))
+
+
+def detection_classes(categories):
+    if isinstance(categories, str):
+        categories = (categories,)
+    names = target_classes(categories)
+    if "people" in categories:
+        names |= {"bicycle", "motorcycle", "horse"}
+    if "animals" in categories or "vehicles" in categories:
+        names.add("person")
     return [i for i, name in CLASSES.items() if name in names]
 
 

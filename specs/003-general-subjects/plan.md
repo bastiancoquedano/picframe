@@ -40,3 +40,13 @@ selección manual protege unión de todas las parejas plausibles y registra ince
 
 ## Complexity Tracking
 Sin excepciones. Marca solo producto/distribución; no reescribir imports ni mover checkout activo.
+
+## Corrección: modo Automático y selección múltiple
+
+Config añade subject_categories opcional (tupla canónica) y active_categories; subject_category
+sigue como fallback para configuraciones anteriores. Detectar unión de clases y compañeros.
+Deduplicar candidatos por member_ids para que un conjunto no compita consigo mismo en mixto.
+Ventana reemplaza combo por Automático inicial, resumen de tres categorías y casillas al
+personalizar. CLI añade --auto-subjects y --subject-categories; mutuamente excluyentes con singular.
+Pruebas antes de modificar: lote mixto, exclusión personalizada, caché, deduplicación, lista vacía,
+normalización/compatibilidad. Sin nuevas dependencias ni investigación técnica pendiente.

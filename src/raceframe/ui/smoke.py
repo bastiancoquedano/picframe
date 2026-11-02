@@ -37,6 +37,9 @@ def run_smoke(report_path):
             with Image.new("RGB", (120, 80), "black") as empty:
                 real.detect(empty)
             real_categories.append(category)
+        real.config = Config(subject_categories=("people", "animals", "vehicles"))
+        with Image.new("RGB", (120, 80), "black") as empty:
+            real.detect(empty)
 
         class Detector:
             def detect(self, image):
@@ -93,7 +96,9 @@ def run_smoke(report_path):
         for category, strategy, detections in scenarios:
             scenario_detector = ScenarioDetector(detections)
             scenario_config = Config(
-                subject_category=category, selection_strategy=strategy, min_long_edge=300
+                subject_categories=("people", "animals", "vehicles"),
+                selection_strategy=strategy,
+                min_long_edge=300,
             )
             scenario_row = analyze_image(
                 inv.root, inv.images[0], scenario_detector, scenario_config
@@ -118,6 +123,12 @@ def run_smoke(report_path):
                 }
             )
         window = MainWindow()
+        if not window.auto_subjects.isChecked() or window.current_config().active_categories != (
+            "people",
+            "animals",
+            "vehicles",
+        ):
+            raise RuntimeError("Automático no está activo inicialmente en el bundle")
         window.review_filter.setCurrentIndex(1)
         window.on_record(row)
         window.apply_review_filter()
@@ -135,6 +146,7 @@ def run_smoke(report_path):
             "review_filter_verified": True,
             "real_inference_cpu": True,
             "real_categories": real_categories,
+            "automatic_categories_verified": True,
             "synthetic_scenarios": synthetic_scenarios,
             "status": result["status"],
             "summary": result["summary"],

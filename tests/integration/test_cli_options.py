@@ -54,3 +54,39 @@ def test_cli_bad_margin_is_preparation_error(photo_factory, tmp_path, capsys):
     model.write_bytes(b"test")
     assert main(["process", str(path.parent), "--model", str(model), "--margin", "nan"]) == 2
     assert "error" in json.loads(capsys.readouterr().out)
+
+
+def test_cli_automatic_categories_and_exclusive_options(
+    photo_factory, tmp_path, fake_detector, capsys
+):
+    path = photo_factory("input/a.jpg", size=(1200, 800))
+    fake_detector.detections = [Detection(0, Box(200, 200, 1000, 600), 0.95, class_name="dog")]
+    model = tmp_path / "model.pt"
+    model.write_bytes(b"model")
+    args = [
+        "process",
+        str(path.parent),
+        "--model",
+        str(model),
+        "--output",
+        str(tmp_path / "out"),
+        "--selection-strategy",
+        "dominant",
+    ]
+    assert main([*args, "--auto-subjects"], detector_factory=lambda *a: fake_detector) == 0
+    result = json.loads(capsys.readouterr().out)
+    manifest = json.loads(Path(result["manifest_path"]).read_text())
+    assert manifest["config"]["subject_categories"] == ["people", "animals", "vehicles"]
+    assert manifest["images"][0]["selection_status"] == "selected"
+    assert (
+        main(
+            [*args, "--subject-categories", "people", "animals"],
+            detector_factory=lambda *a: fake_detector,
+        )
+        == 0
+    )
+    result = json.loads(capsys.readouterr().out)
+    assert json.loads(Path(result["manifest_path"]).read_text())["config"][
+        "subject_categories"
+    ] == ["people", "animals"]
+    assert main([*args, "--auto-subjects", "--subject-category", "people"]) == 2

@@ -86,3 +86,26 @@ def test_adapter_preserves_vehicle_class_and_rejects_custom_names(tmp_path, monk
     model.names[2] = "custom_label"
     with pytest.raises(ValueError, match="COCO"):
         module.YoloDetector(path, Config(subject_category="vehicles"), runtime_dir=tmp_path)
+
+
+def test_adapter_automatic_and_combined_class_filters(tmp_path, monkeypatch):
+    path = tmp_path / "model.pt"
+    path.write_bytes(b"model")
+    model = Model()
+    backend = SimpleNamespace(
+        model=model,
+        convert_image=lambda image: image.size,
+        mps_available=lambda: False,
+        versions={},
+    )
+    monkeypatch.setattr(module, "_load_backend", lambda *a: backend)
+    module.YoloDetector(
+        path, Config(subject_categories=("people", "animals", "vehicles")), runtime_dir=tmp_path
+    )
+    assert model.calls[-1]["classes"] == list(module.CLASSES)
+    module.YoloDetector(
+        path, Config(subject_categories=("people", "animals")), runtime_dir=tmp_path
+    )
+    assert 16 in model.calls[-1]["classes"]  # perro activo
+    assert 2 not in model.calls[-1]["classes"]  # auto excluido
+    assert 1 in model.calls[-1]["classes"]  # bicicleta auxiliar protegida

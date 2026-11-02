@@ -44,7 +44,7 @@ sin objeto objetivo; grupos que ocupan casi toda la imagen; orientaciones EXIF; 
 No identificar corredores/espectadores por ropa o espalda. No afirmar que proximidad demuestra montaje.
 
 ## Requirements
-- **FR-001**: Categorías Personas/Animales/Vehículos; mostrar etiquetas de clase legibles.
+- **FR-001**: Categorías combinables Personas/Animales/Vehículos y Automático inicial; mostrar etiquetas de clase legibles.
 - **FR-002**: Estrategias Protagonista dominante/Conservar grupo/Revisión manual.
 - **FR-003**: Dominante exige confianza y área mínimas y ventaja de tamaño configurable (inicial 1,5).
 - **FR-004**: Grupo protege unión de candidatos confiables y compañeros asociados.
@@ -70,7 +70,7 @@ sesión con categoría/estrategia; composición con región protegida; exportaci
 ## Clarifications
 ### Session 2026-11-01
 - La instrucción del propietario aprueba implementar la propuesta anterior con Spec Kit.
-- Dominante en la interfaz por defecto; CLI conserva estrategia conservadora previa.
+- Automático incluye las tres categorías sin elegir por fotografía. Dominante en la interfaz por defecto; CLI conserva estrategia conservadora previa.
 - Grupo es elección explícita; no es fallback silencioso de Dominante.
 - El propietario confirmó Picframe y pidió renombrar el repositorio a picframe; conservar historial.
 
@@ -78,3 +78,15 @@ sesión con categoría/estrategia; composición con región protegida; exportaci
 Mismo modelo instalado; clases limitadas a su catálogo, sin nuevos pesos/dependencias.
 Umbrales geométricos iniciales no equivalen a validación fotográfica. T042/T043 siguen pendientes.
 No incluye RAW, poses, dorsales, perfiles persistentes ni guardar sesiones. Uso local personal.
+
+## Corrección solicitada: Automático y categorías combinables
+
+El propietario aclaró que no quiere elegir una categoría para cada tipo de foto.
+FR-011: Automático activo inicialmente detecta Personas, Animales y Vehículos en cada imagen.
+Desactivar Automático permite casillas independientes y cualquier combinación no vacía.
+Dominante compara candidatos del conjunto de categorías activas; Grupo protege su unión.
+Asociaciones idénticas (persona+bici/caballo) cuentan una sola vez, sin falsa ambigüedad.
+Cambiar Automático o casillas invalida análisis; ninguna categoría seleccionada impide analizar
+y muestra instrucción. Mantener CLI/configuración singular compatible; registrar selección múltiple.
+Aceptación: un lote mixto persona/perro/auto se analiza/exporta sin cambiar controles entre fotos;
+Personas+Animales excluye autos; el conjunto persona+bici sigue siendo un solo candidato.

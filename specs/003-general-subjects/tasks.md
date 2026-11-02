@@ -43,3 +43,10 @@ MVP: categorías primero; luego políticas, protección de conjuntos, interfaz y
 FR001 T003/T005/T008; FR002/003/004 T006; FR005 T003/T008; FR006 T006;
 FR007/008/009 T007/T009; FR010 T010/T011/T012. SC001 T009; SC002/003 T002/T007;
 SC004 T009; SC005 T011. Sin hooks registrados; T042/T043 anteriores siguen pendientes.
+
+## Corrección: Automático y selección múltiple
+- [X] T013 Probar configuraciones múltiples, deduplicación y lote mixto en tests/unit/test_subject_selection.py y tests/integration/test_ui_subjects.py.
+- [X] T014 Implementar unión de categorías y compatibilidad en src/raceframe/{config.py,core/categories.py,core/subjects.py,core/selection.py,core/detection.py,cli/main.py}.
+- [X] T015 Reemplazar selector por Automático/casillas en src/raceframe/ui/window.py, con caché y validación coherentes.
+- [X] T016 Actualizar contratos/docs, ejecutar regresión y construir/verificar Picframe.app; publicar código.
+Dependencias: T013 → T014 → T015 → T016. Sin hooks de extensión.

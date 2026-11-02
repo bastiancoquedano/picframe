@@ -23,6 +23,7 @@ def _unique_object(pairs):
 @dataclass(frozen=True)
 class Config:
     subject_category: str = "people"
+    subject_categories: tuple[str, ...] | None = None
     selection_strategy: str = "manual"
     dominance_ratio: float = 1.5
     recursive: bool = False
@@ -47,7 +48,33 @@ class Config:
     weights: tuple[float, ...] = (0.35, 0.25, 0.25, 0.15)
     retentions: tuple[float, ...] = (0.85, 0.70, 0.50)
 
+    @property
+    def active_categories(self):
+        return (
+            self.subject_categories
+            if self.subject_categories is not None
+            else (self.subject_category,)
+        )
+
     def __post_init__(self):
+        if self.subject_categories is not None:
+            values = self.subject_categories
+            if (
+                not isinstance(values, (list, tuple))
+                or not values
+                or any(
+                    not isinstance(v, str) or v not in ("people", "animals", "vehicles")
+                    for v in values
+                )
+            ):
+                raise ValueError("Selecciona al menos una categoría válida de sujetos")
+            object.__setattr__(
+                self,
+                "subject_categories",
+                tuple(
+                    category for category in ("people", "animals", "vehicles") if category in values
+                ),
+            )
         if self.subject_category not in ("people", "animals", "vehicles"):
             raise ValueError("Categoría de sujeto inválida")
         if self.selection_strategy not in ("manual", "dominant", "group"):
@@ -117,6 +144,8 @@ class Config:
                 continue
             if not isinstance(source, Mapping) or any(k not in allowed for k in source):
                 raise ValueError("Configuración no válida o con claves desconocidas")
+            if "subject_category" in source and "subject_categories" not in source:
+                merged.pop("subject_categories", None)
             merged.update(source)
         return cls(**merged)
 

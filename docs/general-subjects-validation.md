@@ -21,3 +21,15 @@ Diagnóstico bajo deny network* correcto: inferencia CPU con categorías people/
 ventana Qt/filtro y exportación de cuatro escenarios sintéticos. Animal, conjunto y grupo
 produjeron recortes metadata_verified; vehículo conservó el original completo por geometría
 (sin recodificación). No se atribuyen resultados visuales reales a detecciones simuladas.
+
+## Corrección 0.3.1 — Automático y categorías combinables
+
+198 pruebas locales aprobadas con detector real disponible; ruff check y formato correctos.
+Lote sintético mixto persona/perro/auto analizado y exportado sin cambiar categorías, con tres
+inferencias para tres fotos. Casillas combinables, selección vacía, invalidación y reconstrucción
+del detector por categorías efectivas verificados. Asociaciones persona+bici/caballo no compiten
+consigo mismas al activar varias categorías. CLI nuevo y configuración singular compatibles.
+Captura actualizada con Automático visible y muestra sintética persona+perro.
+Bundle 0.3.1 reconstruido y diagnóstico bajo deny network* aprobado: automatic_categories_verified,
+filtro, inferencia CPU con todas las categorías y exportación de objetos/conjuntos/grupos.
+codesign --verify --deep --strict correcto. No nueva validación fotográfica ni notarización.

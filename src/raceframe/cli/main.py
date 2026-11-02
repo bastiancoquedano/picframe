@@ -43,7 +43,12 @@ def main(argv=None, *, detector_factory=None):
     process.add_argument("--min-long-edge", type=int)
     process.add_argument("--composition-priority", choices=("headroom", "occupancy"))
     process.add_argument("--head-fraction", type=float)
-    process.add_argument("--subject-category", choices=("people", "animals", "vehicles"))
+    subject_options = process.add_mutually_exclusive_group()
+    subject_options.add_argument("--subject-category", choices=("people", "animals", "vehicles"))
+    subject_options.add_argument(
+        "--subject-categories", nargs="+", choices=("people", "animals", "vehicles")
+    )
+    subject_options.add_argument("--auto-subjects", action="store_true")
     process.add_argument("--selection-strategy", choices=("manual", "dominant", "group"))
     process.add_argument("--dominance-ratio", type=float)
     report = sub.add_parser("report", help="Consultar o recuperar un trabajo local")
@@ -84,11 +89,14 @@ def main(argv=None, *, detector_factory=None):
                 "composition_priority",
                 "head_fraction",
                 "subject_category",
+                "subject_categories",
                 "selection_strategy",
                 "dominance_ratio",
             )
             if getattr(args, name) is not None
         }
+        if args.auto_subjects:
+            overrides["subject_categories"] = ("people", "animals", "vehicles")
         config = (
             Config.from_file(args.config, overrides)
             if args.config

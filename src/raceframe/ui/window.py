@@ -29,7 +29,7 @@ from PySide6.QtWidgets import (
 
 from raceframe import __version__
 from raceframe.config import Config
-from raceframe.core.categories import CATEGORIES, class_label
+from raceframe.core.categories import class_label, target_classes
 from raceframe.core.processing import process_folder
 from raceframe.export.directory import validate_job_name
 from raceframe.imaging.discovery import discover
@@ -187,9 +187,27 @@ class MainWindow(QMainWindow):
         self.settings_panel = QGroupBox("Encuadre")
         settings = QVBoxLayout(self.settings_panel)
         subjects = QHBoxLayout()
-        self.category = self.combo(
-            [("Personas", "people"), ("Animales", "animals"), ("Vehículos", "vehicles")]
+        self.auto_subjects = QCheckBox("Automático")
+        self.auto_subjects.setChecked(True)
+        self.auto_subjects.setToolTip(
+            "Busca personas, animales y vehículos en cada foto, sin elegir por imagen."
         )
+        self.subject_summary = QLabel("Personas, animales y vehículos")
+        self.subject_summary.setObjectName("muted")
+        self.custom_subjects = QWidget()
+        category_layout = QHBoxLayout(self.custom_subjects)
+        category_layout.setContentsMargins(0, 0, 0, 0)
+        self.category_checks = {}
+        for name, label in (
+            ("people", "Personas"),
+            ("animals", "Animales"),
+            ("vehicles", "Vehículos"),
+        ):
+            checkbox = QCheckBox(label)
+            checkbox.setChecked(True)
+            self.category_checks[name] = checkbox
+            category_layout.addWidget(checkbox)
+        self.custom_subjects.hide()
         self.strategy = self.combo(
             [
                 ("Protagonista dominante", "dominant"),
@@ -197,15 +215,14 @@ class MainWindow(QMainWindow):
                 ("Revisión manual", "manual"),
             ]
         )
-        self.category.setToolTip(
-            "Clases del modelo actual; no reconoce cualquier especie o vehículo."
-        )
         self.strategy.setToolTip(
             "Dominante requiere ventaja clara de tamaño; "
             "Grupo protege todos los candidatos confiables."
         )
         subjects.addWidget(QLabel("Sujetos"))
-        subjects.addWidget(self.category)
+        subjects.addWidget(self.auto_subjects)
+        subjects.addWidget(self.subject_summary)
+        subjects.addWidget(self.custom_subjects)
         subjects.addWidget(QLabel("Selección"))
         subjects.addWidget(self.strategy, 1)
         settings.addLayout(subjects)
@@ -374,7 +391,6 @@ class MainWindow(QMainWindow):
         self.timer.setInterval(200)
         self.timer.timeout.connect(self.update_elapsed)
         self.config_controls = [
-            self.category,
             self.strategy,
             self.dominance,
             self.mode,
@@ -392,6 +408,9 @@ class MainWindow(QMainWindow):
             (
                 widget.currentIndexChanged if isinstance(widget, QComboBox) else widget.valueChanged
             ).connect(self.invalidate)
+        self.auto_subjects.toggled.connect(self.subjects_changed)
+        for checkbox in self.category_checks.values():
+            checkbox.toggled.connect(self.subjects_changed)
         self.recursive.toggled.connect(self.recursion_changed)
         self.model_edit.textChanged.connect(self.invalidate)
         self.source_edit.editingFinished.connect(self.source_edited)
@@ -406,9 +425,24 @@ class MainWindow(QMainWindow):
             combo.addItem(label, value)
         return combo
 
+    def selected_categories(self):
+        if self.auto_subjects.isChecked():
+            return ("people", "animals", "vehicles")
+        return tuple(
+            name for name, checkbox in self.category_checks.items() if checkbox.isChecked()
+        )
+
+    def subjects_changed(self, *unused):
+        automatic = self.auto_subjects.isChecked()
+        self.subject_summary.setVisible(automatic)
+        self.custom_subjects.setVisible(not automatic)
+        self.invalidate()
+        if not self.selected_categories():
+            self.status.setText("Marca al menos una categoría o activa Automático.")
+
     def current_config(self):
         return Config(
-            subject_category=self.category.currentData(),
+            subject_categories=self.selected_categories(),
             selection_strategy=self.strategy.currentData(),
             dominance_ratio=self.dominance.value(),
             mode=self.mode.currentData(),
@@ -501,7 +535,9 @@ class MainWindow(QMainWindow):
         busy = self.worker is not None
         self.paths_panel.setEnabled(not busy)
         self.settings_panel.setEnabled(not busy)
-        self.analyze_button.setEnabled(not busy and bool(self.source_edit.text()))
+        self.analyze_button.setEnabled(
+            not busy and bool(self.source_edit.text()) and bool(self.selected_categories())
+        )
         self.export_button.setEnabled(not busy and self.analysis_complete and bool(self.records))
         self.cancel_button.setEnabled(busy and not self.worker.cancel.is_set() if busy else False)
         self.results_button.setEnabled(self.last_result is not None)
@@ -546,7 +582,7 @@ class MainWindow(QMainWindow):
             str(weights.resolve()),
             config.device,
             config.detection_confidence,
-            config.subject_category,
+            config.active_categories,
         )
         existing = self.detector if key == self.detector_key else None
 
@@ -787,10 +823,9 @@ class MainWindow(QMainWindow):
             self.person_combo.clear()
             self.person_combo.addItem("Seleccionar…", None)
             for detection in row["detections"]:
-                if (
-                    "invalid_detection" not in detection.get("reasons", [])
-                    and detection["class_name"] in CATEGORIES[self.analysis_config.subject_category]
-                ):
+                if "invalid_detection" not in detection.get("reasons", []) and detection[
+                    "class_name"
+                ] in target_classes(self.analysis_config.active_categories):
                     self.person_combo.addItem(
                         f"{class_label(detection['class_name'])} {detection['detection_id'] + 1}"
                         f" · {detection['confidence']:.0%}",

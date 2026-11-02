@@ -6,7 +6,7 @@ exporta a una carpeta independiente, sin modificar originales.
 
 ## Estado actual
 
-**Picframe 0.3.0 ya tiene interfaz de escritorio**, además del CLI.
+**Picframe 0.3.1 ya tiene interfaz de escritorio**, además del CLI.
 La aplicación local está en `dist/Picframe.app`: abrir con doble clic en Finder.
 Permite elegir carpetas, analizar en segundo plano, comparar original/recorte, seleccionar
 otro sujeto, dibujar un recorte seguro y exportar con los metadatos verificados.
@@ -129,11 +129,13 @@ La referencia actual es el borde superior de detección: no es una localización
 --head-fraction configura la posición desde arriba (default 1/3; JSON también admite ambos campos).
 La alternativa occupancy mantiene la regla anterior del 75 %. Focal menor/ausente conserva contexto.
 
-## Sujetos generales — 0.3.0
+## Sujetos generales — 0.3.1
 
-En Encuadre elegir Personas/Animales/Vehículos y Protagonista dominante/Conservar grupo/Revisión manual.
+En Encuadre, **Automático** busca personas, animales y vehículos en cada foto, sin cambiar
+controles entre imágenes. Al desactivarlo aparecen casillas para combinar las categorías deseadas.
+En Selección elegir Protagonista dominante/Conservar grupo/Revisión manual.
 Dominante exige ventaja de área 1,5×, configurable en Más opciones. Empates siguen en revisión.
-Grupo protege todos los candidatos confiables de la categoría, con sus compañeros geométricos.
+Grupo protege todos los candidatos confiables de las categorías activas, con sus compañeros geométricos.
 Clases admitidas y límites: [guía de escritorio](docs/desktop.md). Mismos pesos, todo local.
 
 Nombre anterior: Raceframe. Repositorio actual: https://github.com/bastiancoquedano/picframe .

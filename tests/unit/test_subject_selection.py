@@ -102,3 +102,44 @@ def test_group_ignores_low_confidence_targets():
     values = [d(0, (100, 100, 300, 500)), d(1, (600, 100, 800, 500), confidence=0.4)]
     result = select_subject(values, 1000, 600, Config(selection_strategy="group"))
     assert result.selected_ids == (0,)
+
+
+def test_multicategory_config_is_canonical_and_keeps_legacy_support():
+    cfg = Config(subject_categories=["animals", "people", "animals"])
+    assert cfg.active_categories == ("people", "animals")
+    assert Config.from_sources(cfg.to_dict()).active_categories == cfg.active_categories
+    assert Config(subject_category="vehicles").active_categories == ("vehicles",)
+    assert Config.from_sources(
+        cfg.to_dict(), {"subject_category": "vehicles"}
+    ).active_categories == ("vehicles",)
+    for invalid in ([], ["food"], "people", [None]):
+        with pytest.raises(ValueError):
+            Config(subject_categories=invalid)
+
+
+def test_combined_categories_select_across_classes_and_filter_unselected():
+    cfg = Config(subject_categories=("people", "animals"), selection_strategy="dominant")
+    values = [
+        d(0, (300, 100, 450, 500)),
+        d(1, (100, 300, 800, 800), "dog"),
+        d(2, (0, 0, 1000, 900), "car"),
+    ]
+    assert select_subject(values, 1200, 1000, cfg).selected_id == 1
+    all_categories = replace(cfg, subject_categories=("people", "animals", "vehicles"))
+    assert select_subject(values, 1200, 1000, all_categories).selected_id == 2
+    group = select_subject(values, 1200, 1000, replace(cfg, selection_strategy="group"))
+    assert group.selected_ids == (0, 1)
+
+
+@pytest.mark.parametrize("partner", ["bicycle", "horse"])
+def test_automatic_associated_pair_competes_once(partner):
+    values = [d(0, (220, 100, 420, 550)), d(1, (100, 350, 650, 650), partner)]
+    cfg = Config(
+        subject_categories=("people", "animals", "vehicles"), selection_strategy="dominant"
+    )
+    result = select_subject(values, 1000, 800, cfg)
+    assert result.status == "selected"
+    assert result.selected_ids == (0, 1)
+    assert result.metrics["candidate_count"] == 1
+    assert result.subject_kind == "associated"
+    assert select_subject(list(reversed(values)), 1000, 800, cfg).selected_ids == (0, 1)
