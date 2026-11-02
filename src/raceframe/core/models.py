@@ -12,6 +12,7 @@ class SelectionStatus(StrEnum):
     AMBIGUOUS = "ambiguous"
     LOW_CONFIDENCE = "low_confidence"
     NO_PERSON = "no_person"
+    NO_SUBJECT = "no_subject"
     NOT_ANALYZED = "not_analyzed"
 
 
@@ -87,6 +88,7 @@ class Detection:
     class_name: str = "person"
     eligible: bool = False
     reasons: tuple[str, ...] = ()
+    class_id: int | None = None
 
 
 @dataclass(frozen=True)
@@ -95,6 +97,11 @@ class Selection:
     detections: tuple[Detection, ...] = ()
     selected_id: int | None = None
     reasons: tuple[str, ...] = ()
+    selected_ids: tuple[int, ...] = ()
+    subject_box: Box | None = None
+    subject_kind: str | None = None
+    metrics: dict = field(default_factory=dict)
+    associations: tuple[dict, ...] = ()
 
 
 @dataclass(frozen=True)

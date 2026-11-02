@@ -1,4 +1,4 @@
-"""Ventana de revisión y exportación local de Raceframe."""
+"""Ventana de revisión y exportación local de Picframe."""
 
 from copy import deepcopy
 from datetime import date
@@ -29,6 +29,7 @@ from PySide6.QtWidgets import (
 
 from raceframe import __version__
 from raceframe.config import Config
+from raceframe.core.categories import CATEGORIES, class_label
 from raceframe.core.processing import process_folder
 from raceframe.export.directory import validate_job_name
 from raceframe.imaging.discovery import discover
@@ -132,7 +133,7 @@ class MainWindow(QMainWindow):
         self.preview_id = None
         self.close_when_finished = False
         self.started = None
-        self.setWindowTitle(f"Raceframe {__version__}")
+        self.setWindowTitle(f"Picframe {__version__}")
         self.resize(1260, 900)
         self.setMinimumSize(980, 700)
         self.setStyleSheet(STYLE)
@@ -142,11 +143,11 @@ class MainWindow(QMainWindow):
         root.setContentsMargins(20, 16, 20, 16)
         root.setSpacing(11)
         header = QHBoxLayout()
-        brand = QLabel("Raceframe")
+        brand = QLabel("Picframe")
         brand.setObjectName("brand")
         header.addWidget(brand)
         header.addStretch()
-        muted = QLabel(f"Encuadre deportivo · Local · v{__version__}")
+        muted = QLabel(f"Encuadre fotográfico · Local · v{__version__}")
         muted.setObjectName("muted")
         header.addWidget(muted)
         root.addLayout(header)
@@ -170,7 +171,7 @@ class MainWindow(QMainWindow):
             paths.addWidget(QLabel(label), i, 0)
             paths.addWidget(edit, i, 1)
             paths.addWidget(button, i, 2)
-        self.folder_name_edit = QLineEdit(f"Raceframe_{date.today().isoformat()}")
+        self.folder_name_edit = QLineEdit(f"Picframe_{date.today().isoformat()}")
         self.folder_name_edit.setPlaceholderText("Por ejemplo: Carrera del domingo")
         self.folder_name_edit.setToolTip(
             "Se creará dentro del destino. Si existe, se añadirá (2), (3), etc."
@@ -185,12 +186,38 @@ class MainWindow(QMainWindow):
         root.addWidget(self.paths_panel)
         self.settings_panel = QGroupBox("Encuadre")
         settings = QVBoxLayout(self.settings_panel)
+        subjects = QHBoxLayout()
+        self.category = self.combo(
+            [("Personas", "people"), ("Animales", "animals"), ("Vehículos", "vehicles")]
+        )
+        self.strategy = self.combo(
+            [
+                ("Protagonista dominante", "dominant"),
+                ("Conservar grupo", "group"),
+                ("Revisión manual", "manual"),
+            ]
+        )
+        self.category.setToolTip(
+            "Clases del modelo actual; no reconoce cualquier especie o vehículo."
+        )
+        self.strategy.setToolTip(
+            "Dominante requiere ventaja clara de tamaño; "
+            "Grupo protege todos los candidatos confiables."
+        )
+        subjects.addWidget(QLabel("Sujetos"))
+        subjects.addWidget(self.category)
+        subjects.addWidget(QLabel("Selección"))
+        subjects.addWidget(self.strategy, 1)
+        settings.addLayout(subjects)
         basic = QHBoxLayout()
         self.mode = self.combo(
             [("Conservador", "conservative"), ("Equilibrado", "balanced"), ("Cerrado", "tight")]
         )
         self.aspect = self.combo([("Original", "original"), ("3:2", "3:2"), ("4:5", "4:5")])
         self.priority = self.combo([("Aire superior", "headroom"), ("Protagonismo", "occupancy")])
+        self.priority.setToolTip(
+            "Aire superior se aplica a una persona individual. Objetos y grupos usan ocupación."
+        )
         self.margin = QDoubleSpinBox()
         self.margin.setRange(0, 50)
         self.margin.setValue(8)
@@ -228,6 +255,14 @@ class MainWindow(QMainWindow):
         self.occupancy.setRange(10, 90)
         self.occupancy.setValue(75)
         self.occupancy.setSuffix(" %")
+        self.dominance = QDoubleSpinBox()
+        self.dominance.setRange(1.01, 100)
+        self.dominance.setSingleStep(0.1)
+        self.dominance.setValue(1.5)
+        self.dominance.setSuffix(" ×")
+        self.dominance.setToolTip(
+            "Área mínima del primero respecto al segundo para seleccionarlo automáticamente."
+        )
         fields = [
             ("Criterio", self.policy),
             ("Dispositivo", self.device),
@@ -235,6 +270,7 @@ class MainWindow(QMainWindow):
             ("Lado largo mínimo", self.min_edge),
             ("Umbral focal", self.focal),
             ("Ocupación objetivo", self.occupancy),
+            ("Ventaja de tamaño", self.dominance),
         ]
         for i, (label, widget) in enumerate(fields):
             row, col = i // 3, (i % 3) * 2
@@ -243,9 +279,9 @@ class MainWindow(QMainWindow):
         self.model_edit = QLineEdit(str(initial_model or model_path()))
         model_button = QPushButton("Elegir modelo…")
         model_button.clicked.connect(self.pick_model)
-        advanced.addWidget(QLabel("Modelo local"), 2, 0)
-        advanced.addWidget(self.model_edit, 2, 1, 1, 4)
-        advanced.addWidget(model_button, 2, 5)
+        advanced.addWidget(QLabel("Modelo local"), 3, 0)
+        advanced.addWidget(self.model_edit, 3, 1, 1, 4)
+        advanced.addWidget(model_button, 3, 5)
         self.advanced.hide()
         self.more_button.toggled.connect(self.advanced.setVisible)
         settings.addWidget(self.advanced)
@@ -309,7 +345,7 @@ class MainWindow(QMainWindow):
         self.original_view.person_clicked.connect(self.choose_person)
         self.original_view.crop_drawn.connect(self.apply_manual_crop)
         for label, view in [
-            ("Original · personas y recorte propuesto", self.original_view),
+            ("Original · sujetos y recorte propuesto", self.original_view),
             ("Vista previa del resultado", self.result_view),
         ]:
             column = QVBoxLayout()
@@ -338,6 +374,9 @@ class MainWindow(QMainWindow):
         self.timer.setInterval(200)
         self.timer.timeout.connect(self.update_elapsed)
         self.config_controls = [
+            self.category,
+            self.strategy,
+            self.dominance,
             self.mode,
             self.aspect,
             self.priority,
@@ -369,6 +408,9 @@ class MainWindow(QMainWindow):
 
     def current_config(self):
         return Config(
+            subject_category=self.category.currentData(),
+            selection_strategy=self.strategy.currentData(),
+            dominance_ratio=self.dominance.value(),
             mode=self.mode.currentData(),
             aspect=self.aspect.currentData(),
             composition_priority=self.priority.currentData(),
@@ -406,7 +448,7 @@ class MainWindow(QMainWindow):
         self.source_edit.setText(str(path))
         self.output_edit.setText(
             str(
-                path.parent / "Raceframe_Output"
+                path.parent / "Picframe_Output"
                 if self.recursive.isChecked()
                 else path / "exportaciones"
             )
@@ -500,7 +542,12 @@ class MainWindow(QMainWindow):
         self.analysis_config = config
         self.count_label.setText(f"{len(inventory.images)} fotografías")
         self.status.setText("Preparando análisis local…")
-        key = (str(weights.resolve()), config.device, config.detection_confidence)
+        key = (
+            str(weights.resolve()),
+            config.device,
+            config.detection_confidence,
+            config.subject_category,
+        )
         existing = self.detector if key == self.detector_key else None
 
         def task(progress, record, cancel):
@@ -740,9 +787,13 @@ class MainWindow(QMainWindow):
             self.person_combo.clear()
             self.person_combo.addItem("Seleccionar…", None)
             for detection in row["detections"]:
-                if "invalid_detection" not in detection.get("reasons", []):
+                if (
+                    "invalid_detection" not in detection.get("reasons", [])
+                    and detection["class_name"] in CATEGORIES[self.analysis_config.subject_category]
+                ):
                     self.person_combo.addItem(
-                        f"Persona {detection['detection_id'] + 1} · {detection['confidence']:.0%}",
+                        f"{class_label(detection['class_name'])} {detection['detection_id'] + 1}"
+                        f" · {detection['confidence']:.0%}",
                         detection["detection_id"],
                     )
             index = self.person_combo.findData(row.get("selected_detection_id"))

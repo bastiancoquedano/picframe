@@ -10,7 +10,7 @@ from raceframe.ui.window import MainWindow
 
 def main():
     app = QApplication.instance() or QApplication(sys.argv)
-    app.setApplicationName("Raceframe")
+    app.setApplicationName("Picframe")
     app.setApplicationVersion(__version__)
     window = MainWindow()
     window.show()

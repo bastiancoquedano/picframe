@@ -1,22 +1,22 @@
-# Raceframe
+# Picframe
 
-Prototipo CLI para mejorar localmente el encuadre de fotografías deportivas JPG/JPEG en macOS
-Apple Silicon. Detecta personas, selecciona un protagonista, calcula recortes conservadores y
+Aplicación local para mejorar el encuadre de fotografías JPG/JPEG en macOS Apple Silicon.
+Detecta personas, animales o vehículos, selecciona un protagonista o protege un grupo y
 exporta a una carpeta independiente, sin modificar originales.
 
 ## Estado actual
 
-**Raceframe 0.2.2 ya tiene interfaz de escritorio**, además del CLI.
-La aplicación local está en `dist/Raceframe.app`: abrir con doble clic en Finder.
+**Picframe 0.3.0 ya tiene interfaz de escritorio**, además del CLI.
+La aplicación local está en `dist/Picframe.app`: abrir con doble clic en Finder.
 Permite elegir carpetas, analizar en segundo plano, comparar original/recorte, seleccionar
-otro corredor, dibujar un recorte seguro y exportar con los metadatos verificados.
+otro sujeto, dibujar un recorte seguro y exportar con los metadatos verificados.
 
 [Guía de escritorio](docs/desktop.md) · [validación](docs/desktop-validation.md)
 
 ![Interfaz con imagen sintética](docs/desktop-preview.png)
 
-La detección sigue sin excluir personas por espalda ni agrupar automáticamente. Las fotos
-ambiguas quedan para revisión y pueden resolverse eligiendo manualmente al protagonista.
+La detección no excluye personas por espalda. Conservar grupo es una elección explícita;
+Dominante mantiene las fotos inciertas en revisión hasta resolver su selección.
 Metadatos estrictos, focal real, prioridad de espacio superior y límites de resolución se
 comparten con el CLI. Los originales no se modifican.
 
@@ -37,7 +37,7 @@ Python 3.11.16 y uv. El Mac de desarrollo ya tiene dependencias y pesos preparad
 uv sync --locked --extra detector --extra gui
 uv run --no-sync python scripts/prepare_model.py
 uv run --no-sync python scripts/prepare_metadata_tool.py
-uv run --no-sync raceframe --version
+uv run --no-sync picframe --version
 ```
 
 La preparación descarga dependencias/pesos explícitamente. El procesamiento posterior no usa
@@ -48,14 +48,14 @@ porque ahora incluye pruebas de widgets; el núcleo geométrico sigue sin import
 ## Procesamiento
 
 ```sh
-uv run --no-sync raceframe process /ruta/entrada --output /ruta/salida --model models/yolo11n.pt
-uv run --no-sync raceframe process /ruta/entrada --output /ruta/salida --model models/yolo11n.pt --mode balanced --aspect 4:5 --device auto
-uv run --no-sync raceframe report /ruta/salida/job-UUID
-uv run --no-sync raceframe report /ruta/salida/job-UUID --recover
+uv run --no-sync picframe process /ruta/entrada --output /ruta/salida --model models/yolo11n.pt
+uv run --no-sync picframe process /ruta/entrada --output /ruta/salida --model models/yolo11n.pt --mode balanced --aspect 4:5 --device auto
+uv run --no-sync picframe report /ruta/salida/job-UUID
+uv run --no-sync picframe report /ruta/salida/job-UUID --recover
 ```
 
 Cada trabajo crea un subdirectorio exclusivo `job-UUID`. Por defecto, el destino propuesto es
-`Raceframe_Output`, hermano de la entrada. Se rechaza destino igual a entrada o dentro de una entrada recursiva.
+`Raceframe_Output` (nombre compatible del CLI), hermano de la entrada. Se rechaza destino igual a entrada o dentro de una entrada recursiva.
 Sin recursión se permite una subcarpeta de salida, excluida del inventario. Dentro del trabajo, nombres repetidos reciben sufijos; nunca se sobrescriben salidas.
 Los volúmenes sin publicación exclusiva mediante enlaces duros se rechazan antes de exportar.
 
@@ -93,7 +93,7 @@ Specify CLI 1.0.1, integración Codex. [Constitución](.specify/memory/constitut
 y [tareas](specs/001-reencuadre-cli/tasks.md). La interfaz tiene su especificación y tareas en `specs/002-desktop-interface/`.
 La aceptación/convergencia completa de la fotografía espera la validación real; las casillas pendientes no se completan por pasar pruebas sintéticas.
 
-Repositorio: [bastiancoquedano/raceframe](https://github.com/bastiancoquedano/raceframe).
+Repositorio: [bastiancoquedano/picframe](https://github.com/bastiancoquedano/picframe).
 No se incluye una licencia propia de distribución ni fotografías/modelos/entornos en Git.
 
 ## Composición por focal y metadatos estrictos
@@ -128,3 +128,14 @@ La referencia actual es el borde superior de detección: no es una localización
 --composition-priority headroom|occupancy selecciona la prioridad (headroom predeterminado).
 --head-fraction configura la posición desde arriba (default 1/3; JSON también admite ambos campos).
 La alternativa occupancy mantiene la regla anterior del 75 %. Focal menor/ausente conserva contexto.
+
+## Sujetos generales — 0.3.0
+
+En Encuadre elegir Personas/Animales/Vehículos y Protagonista dominante/Conservar grupo/Revisión manual.
+Dominante exige ventaja de área 1,5×, configurable en Más opciones. Empates siguen en revisión.
+Grupo protege todos los candidatos confiables de la categoría, con sus compañeros geométricos.
+Clases admitidas y límites: [guía de escritorio](docs/desktop.md). Mismos pesos, todo local.
+
+Nombre anterior: Raceframe. Repositorio actual: https://github.com/bastiancoquedano/picframe .
+Comandos preferidos picframe y picframe-gui; raceframe/raceframe-gui y módulo raceframe siguen
+compatibles. La carpeta local del checkout conserva el nombre histórico; no afecta a Picframe.app.

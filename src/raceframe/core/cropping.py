@@ -115,7 +115,7 @@ def calculate_crop(
     return result(CompositionStatus.CROPPED, best, protected, notes)
 
 
-def calculate_focal_crop(width, height, subject, config, focal_mm=None):
+def calculate_focal_crop(width, height, subject, config, focal_mm=None, *, person=True):
     """Teleobjetivo: ocupación objetivo; angular/focal ausente: contexto."""
     if (
         subject is None
@@ -151,12 +151,12 @@ def calculate_focal_crop(width, height, subject, config, focal_mm=None):
         x = _nearest(subject.center[0] - w / 2, xmin, xmax)
         target_y = (
             subject.y1 - config.head_fraction * h
-            if config.composition_priority == "headroom"
+            if person and config.composition_priority == "headroom"
             else subject.center[1] - h / 2
         )
         y = _nearest(target_y, ymin, ymax)
         head_error = abs(subject.y1 - y - config.head_fraction * h)
-        occupancy = subject.height / h
+        occupancy = subject.height / h if person else max(subject.width / w, subject.height / h)
         key = (
             abs(occupancy - config.target_occupancy),
             abs(subject.center[0] - (x + w / 2)) / w,
@@ -164,7 +164,7 @@ def calculate_focal_crop(width, height, subject, config, focal_mm=None):
             x,
             y,
         )
-        if config.composition_priority == "headroom":
+        if person and config.composition_priority == "headroom":
             key = (0 if head_error <= 1 else 1, 0 if head_error <= 1 else head_error / h, *key)
         if best_key is None or key < best_key:
             best_key = key
@@ -179,14 +179,18 @@ def calculate_focal_crop(width, height, subject, config, focal_mm=None):
             requested_aspect=config.aspect,
             effective_aspect="original",
         )
-    notes = ["focal_subject_priority"]
-    if config.composition_priority == "headroom":
+    notes = ["focal_subject_priority" if person else "object_axis_occupancy_priority"]
+    if person and config.composition_priority == "headroom":
         notes.append("head_upper_third_priority")
         if abs(subject.y1 - best.y1 - config.head_fraction * best.height) > 1:
             notes.append("headroom_limited_by_safety_or_bounds")
         if subject.height / best.height < config.target_occupancy - 0.05:
             notes.append("occupancy_yielded_to_headroom")
-    elif subject.height / best.height < config.target_occupancy - 0.05:
+    elif (
+        subject.height / best.height
+        if person
+        else max(subject.width / best.width, subject.height / best.height)
+    ) < config.target_occupancy - 0.05:
         notes.append("occupancy_limited_by_resolution_or_safety")
     return Composition(
         status=CompositionStatus.UNCHANGED

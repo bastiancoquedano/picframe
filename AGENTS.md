@@ -1,16 +1,16 @@
 # Instrucciones de Raceframe
 
-- Trabajar y documentar en español. Nombre del producto y paquete: Raceframe / raceframe.
+- Trabajar y documentar en español. Producto: Picframe; distribución/comandos picframe; módulo raceframe y alias previos compatibles.
 - Leer `.specify/memory/constitution.md` antes de modificar el proyecto.
 - Usar el flujo oficial de GitHub Spec Kit y las habilidades de `.agents/skills/`.
 - Bootstrap y constitución completados; el propietario aprobó avanzar el 2026-10-31.
 - Especificación y clarificación cerradas el 2026-11-01; plan técnico y contratos redactados.
 - Uso personal confirmado; fotografías inciertas: copiar bytes sin cambios y marcar revisión.
 - Tareas generadas en specs/001-reencuadre-cli/tasks.md; seguir sus dependencias y no saltar validación.
-- El propietario autorizó usar https://github.com/bastiancoquedano/raceframe para subir cambios.
+- El propietario autorizó usar https://github.com/bastiancoquedano/picframe para subir cambios.
 - Publicar solo código/documentación revisados, sin fotos privadas, pesos, credenciales ni entornos.
 - La aprobación de avance ya fue recibida; no volver a pedirla para redactar la especificación.
-- Funcionalidad activa: `specs/002-desktop-interface/`; leer spec.md y plan.md antes de generar tareas.
+- Funcionalidad activa: `specs/003-general-subjects/`; leer spec.md y plan.md antes de generar tareas.
 - No implementar motor, interfaz ni funcionalidades antes de completar las etapas aprobadas.
 - La idea fuente está en `docs/idea-original.md`; conservarla como referencia histórica.
 - CLI implementado: detección local, selección, modos, exportación, diario, cancelación y reportes.
@@ -30,8 +30,11 @@
 - El propietario pidió continuar a interfaz tras la muestra; no excluir personas por espalda.
 - Mantener T042/T043 del CLI pendientes; aprobación de avanzar no equivale a completar esas mediciones.
 
-- Interfaz 0.2.0 implementada y bundle local en dist/Raceframe.app; abrir con Finder.
-- Seguir specs/002-desktop-interface/ y docs/desktop.md. No activar clasificación por espalda ni grupos.
+- Interfaz Picframe 0.3.0 y bundle local en dist/Picframe.app; abrir con Finder.
+- Seguir specs/002-desktop-interface/ y docs/desktop.md. No clasificar por espalda. Grupos explícitos autorizados en specs/003-general-subjects/.
 - Entorno completo: uv sync --locked --extra detector --extra gui --extra build.
 - Pruebas UI con QT_QPA_PLATFORM=offscreen; reales requieren RACEFRAME_TEST_MODEL.
 - No publicar bundle, herramientas, pesos, fotos o logs privados. La .app tiene firma ad hoc, sin notarización.
+
+- El propietario autorizó Picframe y renombrar GitHub a bastiancoquedano/picframe; conservar historial.
+- Sujetos generales y grupo explícito reemplazan las restricciones previas de solo personas/grupos desactivados.

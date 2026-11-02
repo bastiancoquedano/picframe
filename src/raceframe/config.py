@@ -22,6 +22,9 @@ def _unique_object(pairs):
 
 @dataclass(frozen=True)
 class Config:
+    subject_category: str = "people"
+    selection_strategy: str = "manual"
+    dominance_ratio: float = 1.5
     recursive: bool = False
     mode: str = "conservative"
     aspect: str = "original"
@@ -45,6 +48,12 @@ class Config:
     retentions: tuple[float, ...] = (0.85, 0.70, 0.50)
 
     def __post_init__(self):
+        if self.subject_category not in ("people", "animals", "vehicles"):
+            raise ValueError("Categoría de sujeto inválida")
+        if self.selection_strategy not in ("manual", "dominant", "group"):
+            raise ValueError("Estrategia de selección inválida")
+        if not _number(self.dominance_ratio, 1.01, 100):
+            raise ValueError("La ventaja de tamaño debe estar entre 1,01 y 100")
         if type(self.recursive) is not bool:
             raise ValueError("recursive debe ser booleano")
         for name, choices in (

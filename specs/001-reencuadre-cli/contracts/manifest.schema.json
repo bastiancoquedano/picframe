@@ -138,7 +138,8 @@
               "ambiguous",
               "low_confidence",
               "no_person",
-              "not_analyzed"
+              "not_analyzed",
+              "no_subject"
             ]
           },
           "detections": {
@@ -179,6 +180,45 @@
               "object",
               "null"
             ]
+          },
+          "selected_detection_ids": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "uniqueItems": true
+          },
+          "subject_box": {
+            "anyOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "array",
+                "minItems": 4,
+                "maxItems": 4,
+                "items": {
+                  "type": "number"
+                }
+              }
+            ]
+          },
+          "subject_kind": {
+            "enum": [
+              "individual",
+              "associated",
+              "group",
+              null
+            ]
+          },
+          "selection_metrics": {
+            "type": "object"
+          },
+          "associations": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
           }
         }
       }

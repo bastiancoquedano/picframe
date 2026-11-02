@@ -1,11 +1,11 @@
 """Correcciones humanas sobre los contratos geométricos del motor."""
 
 from copy import deepcopy
-from dataclasses import asdict
 from math import ceil, floor
 
-from raceframe.core.cropping import calculate_focal_crop
-from raceframe.core.models import Box
+from raceframe.core.models import Box, Detection
+from raceframe.core.processing import apply_selection
+from raceframe.core.selection import select_subject
 
 
 def needs_review(row):
@@ -32,35 +32,19 @@ def aspect_box(start, end, size, ratio):
 
 
 def select_detection(row, detection_id, config):
-    selected = next((d for d in row["detections"] if d["detection_id"] == detection_id), None)
-    if selected is None or "invalid_detection" in selected.get("reasons", []):
-        raise ValueError("La detección elegida no es válida")
-    box = Box(**selected["box"])
+    values = [Detection(**{**d, "box": Box(**d["box"])}) for d in row["detections"]]
     width, height = row["source"]["oriented_dimensions"]
-    if not box.valid or not Box(0, 0, width, height).contains(box):
-        raise ValueError("La persona no tiene una región válida")
+    selection = select_subject(values, width, height, config, forced_id=detection_id)
     result = deepcopy(row)
-    comp = calculate_focal_crop(width, height, box, config, row["source"].get("focal_length_mm"))
-    result.update(
-        selected_detection_id=detection_id,
-        selection_status="selected",
-        manual_selection=True,
-        manual_crop=False,
-        composition=asdict(comp),
-        crop_xyxy=list(comp.crop.as_tuple()),
-    )
-    result["composition"]["crop"] = list(comp.crop.as_tuple())
-    result["warnings"] = [*comp.reasons, "manual_selection"]
-    result["source"]["subject_height_fraction_original"] = box.height / height
-    result["source"]["subject_height_fraction_output"] = box.height / comp.crop.height
-    result["source"]["estimated_head_fraction_output"] = (box.y1 - comp.crop.y1) / comp.crop.height
+    apply_selection(result, selection, config)
+    result.update(manual_selection=True, manual_crop=False)
     return result
 
 
 def manual_crop(row, box, config):
     width, height = row["source"]["oriented_dimensions"]
     if row.get("selected_detection_id") is None or not row.get("composition"):
-        raise ValueError("Selecciona una persona antes de ajustar el recorte")
+        raise ValueError("Selecciona un sujeto antes de ajustar el recorte")
     protected = row["composition"].get("protected")
     if (
         not box.valid
@@ -90,11 +74,16 @@ def manual_crop(row, box, config):
     result["composition"]["retained_reference_area"] = box.area / (
         reference_width * reference_height
     )
-    selected = next(
-        d for d in row["detections"] if d["detection_id"] == row["selected_detection_id"]
-    )
-    subject = Box(**selected["box"])
+    if row.get("subject_box"):
+        subject = Box(*row["subject_box"])
+    else:
+        selected = next(
+            d for d in row["detections"] if d["detection_id"] == row["selected_detection_id"]
+        )
+        subject = Box(**selected["box"])
     result["source"]["subject_height_fraction_output"] = subject.height / box.height
-    result["source"]["estimated_head_fraction_output"] = (subject.y1 - box.y1) / box.height
+    result["source"]["estimated_head_fraction_output"] = (
+        (subject.y1 - box.y1) / box.height if row["source"].get("head_reference") else None
+    )
     result["warnings"] = ["manual_crop"]
     return result

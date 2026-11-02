@@ -16,6 +16,7 @@ from raceframe.config import Config
 from raceframe.core.cropping import calculate_focal_crop
 from raceframe.core.models import Box, Composition, SelectionStatus
 from raceframe.core.selection import select_subject
+from raceframe.core.subjects import union_boxes
 from raceframe.export.directory import create_job_directory
 from raceframe.export.jpeg import export_image, validate_volume
 from raceframe.export.manifest import AuditError, Journal, atomic_json, summarize
@@ -45,6 +46,11 @@ def blank_result(item):
         "detections": [],
         "selection_status": "not_analyzed",
         "selected_detection_id": None,
+        "selected_detection_ids": [],
+        "subject_box": None,
+        "subject_kind": None,
+        "selection_metrics": {},
+        "associations": [],
         "composition": None,
         "crop_xyxy": None,
         "final_dimensions": None,
@@ -72,14 +78,6 @@ def analyze_loaded(loaded, row, detector, config):
         "exif_orientation": loaded.source_orientation,
     }
     selection = select_subject(detector.detect(loaded.image), width, height, config)
-    row["selection_status"] = selection.status
-    row["selected_detection_id"] = selection.selected_id
-    row["detections"] = [sanitize(asdict(d)) for d in selection.detections]
-    subject = next(
-        (d.box for d in selection.detections if d.detection_id == selection.selected_id), None
-    )
-    if selection.status != SelectionStatus.SELECTED:
-        subject = None
     focal = loaded.exif.get_ifd(34665).get(37386)
     try:
         focal = float(focal) if focal is not None else None
@@ -88,21 +86,56 @@ def analyze_loaded(loaded, row, detector, config):
     except (ValueError, TypeError, ZeroDivisionError):
         focal = None
     row["source"]["focal_length_mm"] = focal
-    comp = calculate_focal_crop(width, height, subject, config, focal)
+    return apply_selection(row, selection, config, warnings=loaded.warnings)
+
+
+def apply_selection(row, selection, config, *, warnings=()):
+    """Una sola representación geométrica para selección automática y manual."""
+    width, height = row["source"]["oriented_dimensions"]
+    focal = row["source"].get("focal_length_mm")
+    row["selection_status"] = selection.status
+    row["selected_detection_id"] = selection.selected_id
+    row["selected_detection_ids"] = list(selection.selected_ids)
+    row["subject_box"] = list(selection.subject_box.as_tuple()) if selection.subject_box else None
+    row["subject_kind"] = selection.subject_kind
+    row["selection_metrics"] = selection.metrics
+    row["associations"] = list(selection.associations)
+    row["detections"] = [sanitize(asdict(d)) for d in selection.detections]
+    subject = selection.subject_box if selection.status == SelectionStatus.SELECTED else None
+    person = selection.subject_kind == "individual" and any(
+        d.detection_id == selection.selected_id and d.class_name == "person"
+        for d in selection.detections
+    )
+    comp = calculate_focal_crop(width, height, subject, config, focal, person=person)
+    if (
+        subject is not None
+        and (not person or config.selection_strategy != "manual")
+        and max(comp.crop.width, comp.crop.height) < min(config.min_long_edge, max(width, height))
+    ):
+        comp = Composition(
+            status="review_required",
+            crop=Box(0, 0, width, height),
+            protected=comp.protected,
+            reasons=(*comp.reasons, "minimum_resolution_requires_original"),
+            margin_requested=config.margin,
+            mode=config.mode,
+            requested_aspect=config.aspect,
+            effective_aspect="original",
+        )
     row["source"]["subject_height_fraction_original"] = (
         None if subject is None else subject.height / height
     )
     row["source"]["subject_height_fraction_output"] = (
         None if subject is None else subject.height / comp.crop.height
     )
-    row["source"]["head_reference"] = "detection_top" if subject is not None else None
+    row["source"]["head_reference"] = "detection_top" if subject is not None and person else None
     row["source"]["estimated_head_fraction_output"] = (
-        None if subject is None else (subject.y1 - comp.crop.y1) / comp.crop.height
+        None if subject is None or not person else (subject.y1 - comp.crop.y1) / comp.crop.height
     )
     row["composition"] = asdict(comp)
     row["composition"]["crop"] = list(comp.crop.as_tuple())
     row["crop_xyxy"] = list(comp.crop.as_tuple())
-    row["warnings"] = list(dict.fromkeys((*loaded.warnings, *selection.reasons, *comp.reasons)))
+    row["warnings"] = list(dict.fromkeys((*warnings, *selection.reasons, *comp.reasons)))
     return comp
 
 
@@ -129,6 +162,16 @@ def cached_composition(cached, item, loaded, detector, config):
     values["crop"] = Box(*values["crop"])
     values["protected"] = Box(**values["protected"]) if values.get("protected") else None
     comp = Composition(**values)
+    member_ids = cached.get("selected_detection_ids", [])
+    if member_ids:
+        members = [Box(**d["box"]) for d in cached["detections"] if d["detection_id"] in member_ids]
+        if len(members) != len(set(member_ids)):
+            raise ValueError("Miembros de selección inválidos")
+        subject = union_boxes(members)
+        if list(subject.as_tuple()) != cached.get("subject_box"):
+            raise ValueError("La caja conjunta no corresponde a los miembros")
+        if comp.protected is None or not comp.protected.contains(subject):
+            raise ValueError("El recorte no protege todos los miembros del sujeto")
     if comp.protected and not comp.crop.contains(comp.protected):
         raise ValueError("El recorte revisado excluye la región protegida")
     return comp
@@ -145,6 +188,11 @@ def analyze_item(root, item, row, detector, config, destination, on_prepared=Non
                 "detections",
                 "selection_status",
                 "selected_detection_id",
+                "selected_detection_ids",
+                "subject_box",
+                "subject_kind",
+                "selection_metrics",
+                "associations",
                 "composition",
                 "crop_xyxy",
                 "warnings",

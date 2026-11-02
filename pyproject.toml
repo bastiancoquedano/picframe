@@ -3,9 +3,9 @@ requires = ["hatchling>=1.27,<2"]
 build-backend = "hatchling.build"
 
 [project]
-name = "raceframe"
-version = "0.2.2"
-description = "Reencuadre local y conservador de fotografía deportiva para macOS"
+name = "picframe"
+version = "0.3.0"
+description = "Reencuadre fotográfico local de personas, animales y vehículos para macOS"
 readme = "README.md"
 requires-python = ">=3.11,<3.12"
 dependencies = [
@@ -21,6 +21,8 @@ dev = [
 ]
 
 [project.scripts]
+picframe = "raceframe.cli.main:main"
+picframe-gui = "raceframe.ui.__main__:main"
 raceframe = "raceframe.cli.main:main"
 raceframe-gui = "raceframe.ui.__main__:main"
 

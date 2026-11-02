@@ -23,8 +23,8 @@ def _error(code, message, exit_code):
 
 
 def main(argv=None, *, detector_factory=None):
-    parser = Parser(prog="raceframe", description="Reencuadre deportivo local")
-    parser.add_argument("--version", action="version", version=f"Raceframe {__version__}")
+    parser = Parser(prog="picframe", description="Reencuadre fotográfico local")
+    parser.add_argument("--version", action="version", version=f"Picframe {__version__}")
     sub = parser.add_subparsers(dest="command")
     process = sub.add_parser("process", help="Analizar y exportar una carpeta JPEG")
     process.add_argument("input", type=Path)
@@ -43,6 +43,9 @@ def main(argv=None, *, detector_factory=None):
     process.add_argument("--min-long-edge", type=int)
     process.add_argument("--composition-priority", choices=("headroom", "occupancy"))
     process.add_argument("--head-fraction", type=float)
+    process.add_argument("--subject-category", choices=("people", "animals", "vehicles"))
+    process.add_argument("--selection-strategy", choices=("manual", "dominant", "group"))
+    process.add_argument("--dominance-ratio", type=float)
     report = sub.add_parser("report", help="Consultar o recuperar un trabajo local")
     report.add_argument("directory", type=Path)
     report.add_argument("--recover", action="store_true")
@@ -80,6 +83,9 @@ def main(argv=None, *, detector_factory=None):
                 "min_long_edge",
                 "composition_priority",
                 "head_fraction",
+                "subject_category",
+                "selection_strategy",
+                "dominance_ratio",
             )
             if getattr(args, name) is not None
         }

@@ -45,11 +45,11 @@ def main():
     if result.returncode:
         print(log.read_text()[-9000:])
         raise SystemExit(result.returncode)
-    resources = root / "dist/Raceframe.app/Contents/Resources"
+    resources = root / "dist/Picframe.app/Contents/Resources"
     for package in ("ultralytics", "torch", "torchvision", "opencv_python", "numpy", "pillow"):
         if not list(resources.glob(package + "-*.dist-info")):
             raise SystemExit("Faltan metadatos de dependencia en el bundle: " + package)
-    print(root / "dist/Raceframe.app")
+    print(root / "dist/Picframe.app")
 
 
 if __name__ == "__main__":

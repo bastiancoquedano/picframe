@@ -31,8 +31,12 @@ def run_smoke(report_path):
         image.save(source / "sample.jpg", exif=exif, quality=95)
         image.close()
         real = YoloDetector(model_path(), Config())
-        with Image.new("RGB", (120, 80), "black") as empty:
-            real.detect(empty)
+        real_categories = []
+        for category in ("people", "animals", "vehicles"):
+            real.config = Config(subject_category=category)
+            with Image.new("RGB", (120, 80), "black") as empty:
+                real.detect(empty)
+            real_categories.append(category)
 
         class Detector:
             def detect(self, image):
@@ -49,6 +53,70 @@ def run_smoke(report_path):
             config=config,
             analysis_overrides={row["image_id"]: row},
         )
+        synthetic_scenarios = []
+        scenarios = [
+            (
+                "animals",
+                "dominant",
+                [Detection(0, Box(150, 500, 650, 900), 0.99, class_name="dog")],
+            ),
+            (
+                "vehicles",
+                "dominant",
+                [Detection(0, Box(100, 600, 700, 900), 0.99, class_name="car")],
+            ),
+            (
+                "people",
+                "dominant",
+                [
+                    Detection(0, Box(280, 200, 460, 800), 0.99),
+                    Detection(1, Box(180, 600, 650, 1000), 0.99, class_name="bicycle"),
+                ],
+            ),
+            (
+                "people",
+                "group",
+                [
+                    Detection(0, Box(100, 300, 250, 1000), 0.99),
+                    Detection(1, Box(500, 300, 650, 1000), 0.99),
+                ],
+            ),
+        ]
+
+        class ScenarioDetector:
+            def __init__(self, values):
+                self.values = values
+
+            def detect(self, image):
+                return tuple(self.values)
+
+        for category, strategy, detections in scenarios:
+            scenario_detector = ScenarioDetector(detections)
+            scenario_config = Config(
+                subject_category=category, selection_strategy=strategy, min_long_edge=300
+            )
+            scenario_row = analyze_image(
+                inv.root, inv.images[0], scenario_detector, scenario_config
+            )
+            scenario_result = process_folder(
+                source,
+                root / "out",
+                detector=scenario_detector,
+                config=scenario_config,
+                analysis_overrides={scenario_row["image_id"]: scenario_row},
+            )
+            if scenario_result["summary"]["exported"] != 1:
+                raise RuntimeError("Falló escenario sintético del bundle: " + category)
+            synthetic_scenarios.append(
+                {
+                    "category": category,
+                    "strategy": strategy,
+                    "kind": scenario_row["subject_kind"],
+                    "members": scenario_row["selected_detection_ids"],
+                    "metadata_verified": "metadata_verified"
+                    in scenario_result["images"][0]["warnings"],
+                }
+            )
         window = MainWindow()
         window.review_filter.setCurrentIndex(1)
         window.on_record(row)
@@ -66,6 +134,8 @@ def run_smoke(report_path):
             "qt_window_created": True,
             "review_filter_verified": True,
             "real_inference_cpu": True,
+            "real_categories": real_categories,
+            "synthetic_scenarios": synthetic_scenarios,
             "status": result["status"],
             "summary": result["summary"],
             "metadata_warnings": result["images"][0]["warnings"],

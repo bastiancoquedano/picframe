@@ -44,7 +44,7 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name="Raceframe",
+    name="Picframe",
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -54,15 +54,15 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
 )
-coll = COLLECT(exe, a.binaries, a.datas, strip=False, upx=False, name="Raceframe")
+coll = COLLECT(exe, a.binaries, a.datas, strip=False, upx=False, name="Picframe")
 app = BUNDLE(
     coll,
-    name="Raceframe.app",
-    bundle_identifier="cl.raceframe.desktop",
+    name="Picframe.app",
+    bundle_identifier="cl.picframe.desktop",
     info_plist={
-        "CFBundleName": "Raceframe",
-        "CFBundleDisplayName": "Raceframe",
-        "CFBundleShortVersionString": "0.2.2",
+        "CFBundleName": "Picframe",
+        "CFBundleDisplayName": "Picframe",
+        "CFBundleShortVersionString": "0.3.0",
         "NSHighResolutionCapable": True,
     },
 )

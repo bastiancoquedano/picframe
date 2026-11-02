@@ -4,6 +4,7 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QColor, QPen, QPixmap, QTransform
 from PySide6.QtWidgets import QGraphicsItem, QGraphicsScene, QGraphicsView
 
+from raceframe.core.categories import class_label
 from raceframe.core.models import Box
 from raceframe.ui.decisions import aspect_box
 
@@ -41,13 +42,17 @@ class PhotoView(QGraphicsView):
                 continue
             color = (
                 "#80d4b7"
-                if detection["detection_id"] == row.get("selected_detection_id")
+                if detection["detection_id"]
+                in row.get("selected_detection_ids", [row.get("selected_detection_id")])
                 else "#edb965"
             )
             pen = QPen(QColor(color), 2)
             pen.setCosmetic(True)
             self.scene().addRect(box.x1, box.y1, box.width, box.height, pen)
-            label = self.scene().addSimpleText(f"Persona {detection['detection_id'] + 1}")
+            label = self.scene().addSimpleText(
+                f"{class_label(detection.get('class_name', 'person'))} "
+                f"{detection['detection_id'] + 1}"
+            )
             label.setBrush(QColor(color))
             label.setPos(box.x1, box.y1)
             label.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIgnoresTransformations)

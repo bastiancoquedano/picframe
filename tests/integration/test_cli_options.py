@@ -19,6 +19,12 @@ def test_all_options_and_report(photo_factory, tmp_path, fake_detector, capsys):
         str(tmp_path / "out"),
         "--model",
         str(model),
+        "--subject-category",
+        "people",
+        "--selection-strategy",
+        "dominant",
+        "--dominance-ratio",
+        "1.8",
         "--composition-priority",
         "occupancy",
         "--mode",
@@ -33,6 +39,8 @@ def test_all_options_and_report(photo_factory, tmp_path, fake_detector, capsys):
     assert main(args, detector_factory=lambda *a: fake_detector) == 0
     result = json.loads(capsys.readouterr().out)
     manifest = json.loads(Path(result["manifest_path"]).read_text())
+    assert manifest["config"]["selection_strategy"] == "dominant"
+    assert manifest["config"]["dominance_ratio"] == 1.8
     assert manifest["config"]["composition_priority"] == "occupancy"
     assert manifest["config"]["quality"] == 90
     assert manifest["config"]["margin"] == 0.1

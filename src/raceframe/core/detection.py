@@ -9,6 +9,7 @@ from types import SimpleNamespace
 from typing import Protocol
 
 from raceframe.config import Config
+from raceframe.core.categories import CLASSES, detection_classes
 from raceframe.core.models import Box, Detection
 from raceframe.export.jpeg import file_hash
 
@@ -116,13 +117,19 @@ class YoloDetector:
         }
 
     def _predict(self, image):
+        classes = detection_classes(self.config.subject_category)
+        names = self.backend.model.names
+        if any(names[i] != CLASSES[i] for i in classes if i in names) or any(
+            i not in names for i in classes
+        ):
+            raise ValueError("El modelo no tiene las clases COCO esperadas para esta categoría")
         source = self.backend.convert_image(image)
         with redirect_stdout(sys.stderr):
             return self.backend.model.predict(
                 source=source,
                 device=self.device,
                 imgsz=640,
-                classes=[0],
+                classes=classes,
                 conf=self.config.detection_confidence,
                 verbose=False,
                 save=False,
@@ -138,6 +145,15 @@ class YoloDetector:
         for coords, confidence, class_id in zip(
             boxes.xyxy.tolist(), boxes.conf.tolist(), boxes.cls.tolist(), strict=True
         ):
-            if int(class_id) == 0:
-                detections.append(Detection(len(detections), Box(*coords), float(confidence)))
+            class_id = int(class_id)
+            if class_id in detection_classes(self.config.subject_category):
+                detections.append(
+                    Detection(
+                        len(detections),
+                        Box(*coords),
+                        float(confidence),
+                        class_name=CLASSES[class_id],
+                        class_id=class_id,
+                    )
+                )
         return tuple(detections)
