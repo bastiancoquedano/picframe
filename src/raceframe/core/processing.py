@@ -4,7 +4,7 @@ import errno
 import hashlib
 import json
 from copy import deepcopy
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from datetime import UTC, datetime
 from math import isfinite
 from pathlib import Path
@@ -13,7 +13,7 @@ from uuid import uuid4
 
 from raceframe import __version__
 from raceframe.config import Config
-from raceframe.core.cropping import calculate_focal_crop
+from raceframe.core.cropping import calculate_focal_crop, preserves_well_framed
 from raceframe.core.models import Box, Composition, SelectionStatus
 from raceframe.core.selection import select_subject
 from raceframe.core.subjects import union_boxes
@@ -89,7 +89,7 @@ def analyze_loaded(loaded, row, detector, config):
     return apply_selection(row, selection, config, warnings=loaded.warnings)
 
 
-def apply_selection(row, selection, config, *, warnings=()):
+def apply_selection(row, selection, config, *, warnings=(), preserve_existing_composition=True):
     """Una sola representación geométrica para selección automática y manual."""
     width, height = row["source"]["oriented_dimensions"]
     focal = row["source"].get("focal_length_mm")
@@ -120,6 +120,20 @@ def apply_selection(row, selection, config, *, warnings=()):
             margin_requested=config.margin,
             mode=config.mode,
             requested_aspect=config.aspect,
+            effective_aspect="original",
+        )
+    if (
+        preserve_existing_composition
+        and comp.status == "cropped"
+        and preserves_well_framed(width, height, subject, config, person=person)
+    ):
+        comp = replace(
+            comp,
+            status="unchanged",
+            crop=Box(0, 0, width, height),
+            reasons=(*comp.reasons, "already_well_framed"),
+            retained_area=1.0,
+            retained_reference_area=1.0,
             effective_aspect="original",
         )
     row["source"]["subject_height_fraction_original"] = (

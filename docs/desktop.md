@@ -1,4 +1,4 @@
-# Picframe de escritorio — 0.3.1
+# Picframe de escritorio — 0.3.2
 
 ## Abrir en este Mac
 
@@ -97,3 +97,16 @@ revise la propuesta antes de exportar. Precisión de las asociaciones pendiente 
 Con categorías combinadas, un conjunto persona+bicicleta/caballo cuenta una sola vez.
 Desde CLI, --auto-subjects activa las tres y --subject-categories people animals permite
 combinaciones. --subject-category singular sigue disponible para configuraciones previas.
+
+## Encuadre original ya logrado
+
+Antes de aplicar un recorte automático, Picframe revisa tamaño, posición y espacio alrededor
+del sujeto o grupo elegido. Si la persona individual ya tiene tamaño razonable y cabeza cerca
+del tercio superior (o el sujeto está equilibrado al centro), conserva la fotografía completa.
+Para animales, vehículos, conjuntos y grupos comprueba tamaño relativo y posición. El tema debe
+conservar un margen de seguridad de todos sus bordes. Se copia el JPEG original byte por byte
+y queda anotado `already_well_framed`; no se altera calidad ni metadatos.
+
+La regla se usa con proporción Original. Si elegiste otra proporción o el modo Cerrado, se
+respeta esa decisión. Elegir otra persona o dibujar un recorte manual también permite corregirlo.
+La geometría estima equilibrio; no interpreta intención artística ni reemplaza la revisión visual.

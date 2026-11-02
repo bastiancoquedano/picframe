@@ -153,3 +153,31 @@ def test_context_minimum_resolution_and_infeasible_group_copy_original(
     )
     exported = Path(result["manifest_path"]).parent / result["images"][0]["output_relative_path"]
     assert exported.read_bytes() == photo.read_bytes()
+
+
+def test_well_framed_telephoto_exports_original_bytes(photo_factory, tmp_path, fake_detector):
+    photo = photo_factory("input/already-well-framed.jpg", size=(3000, 4500))
+    with Image.open(photo) as image:
+        exif = image.getexif()
+        exif[34665] = {37386: 100}
+        image.save(tmp_path / "with-focal.jpg", quality=95, exif=exif)
+    photo.write_bytes((tmp_path / "with-focal.jpg").read_bytes())
+    original = photo.read_bytes()
+    fake_detector.detections = [Detection(0, Box(900, 1170, 1800, 3870), 0.99)]
+    config = Config(selection_strategy="dominant", min_long_edge=1000)
+    inventory = discover(photo.parent, tmp_path / "out")
+    row = analyze_image(inventory.root, inventory.images[0], fake_detector, config)
+    assert row["composition"]["status"] == "unchanged"
+    assert row["crop_xyxy"] == [0, 0, 3000, 4500]
+    assert "already_well_framed" in row["warnings"]
+    result = process_folder(
+        inventory.root,
+        inventory.destination,
+        detector=fake_detector,
+        config=config,
+        analysis_overrides={row["image_id"]: row},
+    )
+    output = Path(result["manifest_path"]).parent / result["images"][0]["output_relative_path"]
+    assert output.read_bytes() == original == photo.read_bytes()
+    assert result["summary"]["unchanged"] == 1
+    assert fake_detector.calls == 1

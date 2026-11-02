@@ -205,3 +205,44 @@ def calculate_focal_crop(width, height, subject, config, focal_mm=None, *, perso
         requested_aspect=config.aspect,
         effective_aspect=config.aspect,
     )
+
+
+def preserves_well_framed(width, height, subject, config, *, person):
+    """Devuelve si el encuadre original ya satisface tamaño, posición y márgenes seguros."""
+    frame = Box(0, 0, width, height)
+    if (
+        subject is None
+        or not subject.valid
+        or not frame.contains(subject)
+        or config.mode == "tight"
+    ):
+        return False
+    source_aspect = width / height
+    requested_aspect = {"original": source_aspect, "3:2": 1.5, "4:5": 0.8}[config.aspect]
+    if abs(source_aspect - requested_aspect) > 0.01:
+        return False
+
+    mx, my = config.margin * subject.width, config.margin * subject.height
+    min_x, min_y = max(width * 0.02, mx), max(height * 0.02, my)
+    if (
+        subject.x1 < min_x
+        or width - subject.x2 < min_x
+        or subject.y1 < min_y
+        or height - subject.y2 < min_y
+    ):
+        return False
+
+    occupancy = (
+        subject.height / height if person else max(subject.width / width, subject.height / height)
+    )
+    lower = max(0.05, config.target_occupancy - (0.20 if person else 0.05))
+    upper = min(0.95, config.target_occupancy + (0.10 if person else 0.05))
+    if not lower <= occupancy <= upper:
+        return False
+
+    cx, cy = subject.center
+    centered = 0.30 <= cx / width <= 0.70 and 0.38 <= cy / height <= 0.70
+    if person:
+        head_in_upper_third = abs(subject.y1 / height - config.head_fraction) <= 0.08
+        return centered or head_in_upper_third
+    return 0.15 <= cx / width <= 0.85 and 0.15 <= cy / height <= 0.85

@@ -19,3 +19,14 @@ Si existe, prima sobre subject_category singular. CLI: --auto-subjects equivale 
 --subject-categories people animals combina. Opciones de categoría mutuamente excluyentes.
 Un argumento singular explícito sustituye categorías múltiples de un archivo de configuración.
 Automático inicial en UI; al desactivarlo se muestran casillas. No cambiar controles entre imágenes.
+
+FR-012 preservation gate: auto decision only. When aspect is original/equivalent, mode != tight,
+and selected region plus safety margin >=2% of each frame edge remains inside with a visually
+balanced size/position, use the full image and warning already_well_framed. Person uses body
+height and head reference; object/association/group uses maximum normalized axis. Manual person
+selection or manual crop bypasses the gate. Full-frame output follows the exact-original-byte path.
+
+Automated gate returns false for safety-margin failure, out-of-frame boxes, nonmatching requested
+aspect or tight mode. For persons, occupancy floor/max derive from target -0.20/+0.10 and position
+is upper-third ±0.08 or balanced center. Other subjects use target ±0.05 and center 15–85%. The
+reason code already_well_framed is present on unchanged original-byte exports.

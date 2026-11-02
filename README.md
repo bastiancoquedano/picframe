@@ -6,7 +6,7 @@ exporta a una carpeta independiente, sin modificar originales.
 
 ## Estado actual
 
-**Picframe 0.3.1 ya tiene interfaz de escritorio**, además del CLI.
+**Picframe 0.3.2 ya tiene interfaz de escritorio**, además del CLI.
 La aplicación local está en `dist/Picframe.app`: abrir con doble clic en Finder.
 Permite elegir carpetas, analizar en segundo plano, comparar original/recorte, seleccionar
 otro sujeto, dibujar un recorte seguro y exportar con los metadatos verificados.
@@ -129,7 +129,7 @@ La referencia actual es el borde superior de detección: no es una localización
 --head-fraction configura la posición desde arriba (default 1/3; JSON también admite ambos campos).
 La alternativa occupancy mantiene la regla anterior del 75 %. Focal menor/ausente conserva contexto.
 
-## Sujetos generales — 0.3.1
+## Sujetos generales — 0.3.2
 
 En Encuadre, **Automático** busca personas, animales y vehículos en cada foto, sin cambiar
 controles entre imágenes. Al desactivarlo aparecen casillas para combinar las categorías deseadas.

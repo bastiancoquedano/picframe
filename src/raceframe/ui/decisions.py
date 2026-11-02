@@ -36,7 +36,7 @@ def select_detection(row, detection_id, config):
     width, height = row["source"]["oriented_dimensions"]
     selection = select_subject(values, width, height, config, forced_id=detection_id)
     result = deepcopy(row)
-    apply_selection(result, selection, config)
+    apply_selection(result, selection, config, preserve_existing_composition=False)
     result.update(manual_selection=True, manual_crop=False)
     return result
 

@@ -50,3 +50,20 @@ Ventana reemplaza combo por Automático inicial, resumen de tres categorías y c
 personalizar. CLI añade --auto-subjects y --subject-categories; mutuamente excluyentes con singular.
 Pruebas antes de modificar: lote mixto, exclusión personalizada, caché, deduplicación, lista vacía,
 normalización/compatibilidad. Sin nuevas dependencias ni investigación técnica pendiente.
+
+## Corrección: conservación previa al recorte
+
+Agregar predicado geométrico puro antes de aplicar un crop automático. Reusar target_occupancy,
+head_fraction y margin. Protección estricta de cuatro lados/margen >=2% de lienzo. Persona
+individual: ocupación target-0.20..target+0.10 y cabeza head_fraction±0.08 o encuadre centrado.
+Resto (objetos, asociaciones y grupos): eje limitante en target_occupancy±0.05, centro de caja
+en banda 15–85%. Solo aspecto original (o aspecto actual equivalente); modo Cerrado conserva
+intención explícita. La excepción manual queda documentada. Registrar already_well_framed y
+publicar original por ruta de copia byte por byte. Sin nuevos ajustes/dependencias.
+
+## Regla de composición satisfecha
+
+El núcleo evalúa la propuesta automática y vuelve a unchanged/frame si el origen ya cumple
+tamaño, posición y márgenes configurados. No altera la configuración ni la estrategia de selección.
+La marca de auditoría already_well_framed explica la decisión; exportador aplica la vía original
+byte por byte. Un formato solicitado distinto y modo Cerrado son excepciones explícitas.

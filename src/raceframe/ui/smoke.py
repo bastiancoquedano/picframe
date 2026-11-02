@@ -56,6 +56,42 @@ def run_smoke(report_path):
             config=config,
             analysis_overrides={row["image_id"]: row},
         )
+        well_framed_root = root / "well-framed"
+        well_framed_root.mkdir()
+        good_path = well_framed_root / "original.jpg"
+        good_exif = Image.Exif()
+        good_exif[271] = "Synthetic"
+        good_exif[34665] = {37386: 100}
+        with Image.new("RGB", (1200, 1800), "#8095a0") as good_image:
+            ImageDraw.Draw(good_image).rectangle((360, 468, 720, 1548), fill="#d06544")
+            good_image.save(good_path, exif=good_exif, quality=95)
+        original_bytes = good_path.read_bytes()
+
+        class WellFramedDetector:
+            def detect(self, image):
+                return (Detection(0, Box(360, 468, 720, 1548), 0.99),)
+
+        good_detector = WellFramedDetector()
+        good_config = Config(selection_strategy="dominant", min_long_edge=300)
+        good_inventory = discover(well_framed_root, root / "well-framed-out")
+        good_row = analyze_image(
+            good_inventory.root, good_inventory.images[0], good_detector, good_config
+        )
+        if "already_well_framed" not in good_row["warnings"]:
+            raise RuntimeError("Picframe no conservó el encuadre original ya logrado")
+        good_result = process_folder(
+            well_framed_root,
+            good_inventory.destination,
+            detector=good_detector,
+            config=good_config,
+            analysis_overrides={good_row["image_id"]: good_row},
+        )
+        good_output = (
+            Path(good_result["manifest_path"]).parent
+            / good_result["images"][0]["output_relative_path"]
+        )
+        if good_output.read_bytes() != original_bytes:
+            raise RuntimeError("Picframe alteró un JPEG con encuadre ya logrado")
         synthetic_scenarios = []
         scenarios = [
             (
@@ -147,6 +183,7 @@ def run_smoke(report_path):
             "real_inference_cpu": True,
             "real_categories": real_categories,
             "automatic_categories_verified": True,
+            "well_framed_original_bytes_verified": True,
             "synthetic_scenarios": synthetic_scenarios,
             "status": result["status"],
             "summary": result["summary"],

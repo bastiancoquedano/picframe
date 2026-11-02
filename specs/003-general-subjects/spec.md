@@ -90,3 +90,17 @@ Cambiar Automático o casillas invalida análisis; ninguna categoría selecciona
 y muestra instrucción. Mantener CLI/configuración singular compatible; registrar selección múltiple.
 Aceptación: un lote mixto persona/perro/auto se analiza/exporta sin cambiar controles entre fotos;
 Personas+Animales excluye autos; el conjunto persona+bici sigue siendo un solo candidato.
+
+## Corrección: conservar encuadres ya logrados
+
+FR-012: Antes de aplicar una propuesta, evaluar la foto original con el sujeto elegido, sus
+márgenes y la composición actual. Si ya está encuadrada con buen tamaño y balance, exportar
+los bytes originales sin recorte, aunque la regla de focal sugiera acercar. Aplicar este principio
+a persona individual, conjuntos, animales, vehículos y grupo. Una selección o recorte manual, una
+proporción de salida distinta solicitada y el modo Cerrado son decisiones explícitas del usuario.
+La propuesta debe recortar solo si mejora claramente la composición y conserva la región protegida.
+No prometer reconocimiento de intención artística. Casos que no pasan los criterios seguros usan
+la regla usual o quedan en revisión si su encuadre no es viable.
+
+SC-006: Una foto sintética bien encuadrada en cada tipo se copia byte por byte, incluso con
+focal larga; caja tocando bordes, sujeto pequeño o composición desequilibrada sigue al motor normal.

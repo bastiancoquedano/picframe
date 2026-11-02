@@ -53,3 +53,8 @@ Dependencias: T013 → T014 → T015 → T016. Sin hooks de extensión.
 
 ## Estabilidad de interfaz detectada en CI
 - [X] T017 Asegurar recolección automática de ciclos Qt en hilo GUI con src/raceframe/ui/lifetime.py y probarla en tests/integration/test_ui_lifetime.py; repetir regresión/CI/bundle.
+
+## Corrección: reconocer buen encuadre existente
+- [X] T018 Probar encuadre logrado/no logrado por tipo y exportación byte a byte en tests/unit/test_framing_preservation.py y tests/integration/test_general_subjects.py.
+- [X] T019 Implementar la regla geométrica previa al recorte en src/raceframe/core/cropping.py y src/raceframe/core/processing.py.
+- [X] T020 Documentar, validar regresión, reconstruir bundle offline y publicar en repo picframe.

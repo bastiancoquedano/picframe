@@ -42,3 +42,18 @@ La corrección de estabilidad pasó CI Linux (run 41376429845). Bundle final rec
 diagnóstico offline aprobado, incluidos Automático, inferencia real y exportación; codesign
 --verify --deep --strict correcto. 199 pruebas locales completas; CI omite pruebas con pesos
 no disponibles explícitamente. No queda tarea técnica pendiente de este incremento.
+
+## 0.3.2 — preservar encuadre ya logrado
+
+La evaluación previa al crop usa detección/box y márgenes, con el JPEG de origen intacto cuando
+la composición cumple los criterios. Una persona requiere tamaño razonable y cabeza cercana
+al tercio superior o cuerpo equilibrado; objeto/grupo requiere ocupación y centro equilibrados.
+Aspecto distinto solicitado y modo Cerrado respetan la elección explícita. La selección manual
+sigue permitiendo elegir el sujeto. Prueba sintética confirma metadata bytes en origen/salida.
+
+Cierre 0.3.2: 208 pruebas locales aprobadas; ruff check/format correctos. Bundle local
+reconstruido con CI de ciclos Qt, detección en Automático y regla de encuadre ya logrado.
+Diagnóstico offline confirma JPEG byte por byte, inferencia CPU y filtro; codesign verificado.
+No se recorta si falta margen, el sujeto es demasiado pequeño o no queda equilibrado. Los casos
+que no satisfacen la regla siguen la propuesta normal. Copias conservadoras no certifican
+intención artística; evaluación visual con 30–50 fotos continúa pendiente.
