@@ -52,4 +52,4 @@ SC004 T009; SC005 T011. Sin hooks registrados; T042/T043 anteriores siguen pendi
 Dependencias: T013 → T014 → T015 → T016. Sin hooks de extensión.
 
 ## Estabilidad de interfaz detectada en CI
-- [ ] T017 Asegurar recolección automática de ciclos Qt en hilo GUI con src/raceframe/ui/lifetime.py y probarla en tests/integration/test_ui_lifetime.py; repetir regresión/CI/bundle.
+- [X] T017 Asegurar recolección automática de ciclos Qt en hilo GUI con src/raceframe/ui/lifetime.py y probarla en tests/integration/test_ui_lifetime.py; repetir regresión/CI/bundle.

@@ -38,3 +38,7 @@ CI detectó SIGSEGV en recolección automática de ciclos desde el worker (run 4
 Se añadió recolección periódica en hilo GUI, restaurando la política anterior al salir y sin
 cambiar CLI. Nueva prueba verifica 3.000 ciclos creados en worker y liberados en GUI.
 Regresión local: 199 pruebas aprobadas. La inferencia sobre causa y fuentes están en research.md.
+La corrección de estabilidad pasó CI Linux (run 41376429845). Bundle final reconstruido y
+diagnóstico offline aprobado, incluidos Automático, inferencia real y exportación; codesign
+--verify --deep --strict correcto. 199 pruebas locales completas; CI omite pruebas con pesos
+no disponibles explícitamente. No queda tarea técnica pendiente de este incremento.
