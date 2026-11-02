@@ -23,3 +23,15 @@ Investigación delegada de lectura, sin escritores adicionales.
 - Decisión: marca Picframe, dist/Picframe.app, alias picframe y repo picframe. Conservar módulo
   raceframe, alias antiguos, historial, rutas de runtime existentes y checkout local para compatibilidad.
   El propietario autorizó el renombrado explícitamente; GitHub confirmó nuevo full_name.
+
+## Estabilidad Qt/Python observada en CI 0.3.1
+
+El runner Linux terminó con SIGSEGV durante Garbage-collecting dentro de un worker al cargar
+una imagen del lote mixto. Inferencia de causa: ciclos de envolturas Qt recolectados por el hilo
+que asigna memoria, incompatible con afinidad GUI. No fue un fallo de aserción de selección.
+Decisión: mientras vive la interfaz, desactivar solo recolección automática de ciclos y ejecutar
+gc.collect mediante QTimer del hilo GUI cada 2 s. Conteo de referencias sigue activo; al salir se
+restaura política anterior. CLI no cambia. No sustituye deleteLater ni cancelación cooperativa.
+Prueba crea 3.000 ciclos en worker y comprueba destrucción en hilo GUI.
+Fuentes oficiales: https://doc.qt.io/qtforpython-6/PySide6/QtCore/QObject.html y
+https://docs.python.org/3.11/library/gc.html . Confirmar con nueva ejecución Linux y bundle local.

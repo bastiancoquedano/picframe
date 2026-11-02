@@ -50,3 +50,6 @@ SC004 T009; SC005 T011. Sin hooks registrados; T042/T043 anteriores siguen pendi
 - [X] T015 Reemplazar selector por Automático/casillas en src/raceframe/ui/window.py, con caché y validación coherentes.
 - [X] T016 Actualizar contratos/docs, ejecutar regresión y construir/verificar Picframe.app; publicar código.
 Dependencias: T013 → T014 → T015 → T016. Sin hooks de extensión.
+
+## Estabilidad de interfaz detectada en CI
+- [ ] T017 Asegurar recolección automática de ciclos Qt en hilo GUI con src/raceframe/ui/lifetime.py y probarla en tests/integration/test_ui_lifetime.py; repetir regresión/CI/bundle.

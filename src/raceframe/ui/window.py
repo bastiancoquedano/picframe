@@ -35,6 +35,7 @@ from raceframe.export.directory import validate_job_name
 from raceframe.imaging.discovery import discover
 from raceframe.imaging.loader import load_image
 from raceframe.ui.decisions import manual_crop, needs_review, select_detection
+from raceframe.ui.lifetime import ensure_gui_collection
 from raceframe.ui.preview import PhotoView
 from raceframe.ui.resources import model_path
 from raceframe.ui.workers import TaskWorker, analyze_folder
@@ -116,6 +117,7 @@ QProgressBar::chunk { background: #87d7b7;
 class MainWindow(QMainWindow):
     def __init__(self, *, detector_factory=None, initial_model=None):
         super().__init__()
+        ensure_gui_collection()
         self.detector_factory = detector_factory
         self.detector = None
         self.detector_key = None

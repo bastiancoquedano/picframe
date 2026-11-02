@@ -33,3 +33,8 @@ Captura actualizada con Automático visible y muestra sintética persona+perro.
 Bundle 0.3.1 reconstruido y diagnóstico bajo deny network* aprobado: automatic_categories_verified,
 filtro, inferencia CPU con todas las categorías y exportación de objetos/conjuntos/grupos.
 codesign --verify --deep --strict correcto. No nueva validación fotográfica ni notarización.
+
+CI detectó SIGSEGV en recolección automática de ciclos desde el worker (run 41375912697).
+Se añadió recolección periódica en hilo GUI, restaurando la política anterior al salir y sin
+cambiar CLI. Nueva prueba verifica 3.000 ciclos creados en worker y liberados en GUI.
+Regresión local: 199 pruebas aprobadas. La inferencia sobre causa y fuentes están en research.md.
