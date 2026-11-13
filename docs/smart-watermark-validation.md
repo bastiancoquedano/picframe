@@ -15,6 +15,8 @@ PyObjC Vision 13.0 y los recursos locales del proyecto.
   exportación con `metadata_verified`. El dibujo sintético obtuvo máscara de baja confianza; Smart
   registró revisión y aplicó el fallback configurado de copia byte-a-byte.
 - `codesign --verify --deep --strict` pasó para el bundle firmado ad hoc.
+- GitHub Actions **Calidad** pasó para el arreglo de dependencias de prueba en
+  [el run de `47b367c`](https://github.com/bastiancoquedano/picframe/actions/runs/43480090756).
 
 La figura geométrica sintética no es una prueba de precisión con personas. El siguiente chequeo visual
 debe hacerse con fotografías reales locales, mirando bordes, movimiento, grupos, ropa de bajo contraste
