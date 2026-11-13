@@ -19,6 +19,9 @@
     "schema_version": {
       "const": 1
     },
+    "job_type": {
+      "const": "watermark"
+    },
     "job_id": {
       "type": "string"
     },
@@ -218,6 +221,69 @@
             "type": "array",
             "items": {
               "type": "object"
+            }
+          },
+          "watermark": {
+            "type": "object",
+            "required": [
+              "mode",
+              "segmentation_status",
+              "segmentation_reason",
+              "fallback_policy",
+              "fallback_applied",
+              "review_required",
+              "backend",
+              "backend_version",
+              "compute_device",
+              "quality",
+              "vision_revision"
+            ],
+            "properties": {
+              "mode": {
+                "enum": ["traditional", "smart"]
+              },
+              "segmentation_status": {
+                "enum": ["not_attempted", "ok", "empty", "error"]
+              },
+              "segmentation_reason": {
+                "type": ["string", "null"]
+              },
+              "fallback_policy": {
+                "type": ["string", "null"],
+                "enum": [
+                  "traditional_foreground",
+                  "copy_original",
+                  "skip_image",
+                  null
+                ]
+              },
+              "fallback_applied": {
+                "type": ["string", "null"],
+                "enum": [
+                  "traditional_foreground",
+                  "copy_original",
+                  "skip_image",
+                  null
+                ]
+              },
+              "review_required": {
+                "type": "boolean"
+              },
+              "backend": {
+                "type": ["string", "null"]
+              },
+              "backend_version": {
+                "type": ["string", "null"]
+              },
+              "compute_device": {
+                "type": ["string", "null"]
+              },
+              "quality": {
+                "type": ["string", "null"]
+              },
+              "vision_revision": {
+                "type": ["integer", "null"]
+              }
             }
           }
         }

@@ -23,6 +23,7 @@ from PySide6.QtWidgets import (
     QPushButton,
     QSpinBox,
     QSplitter,
+    QTabWidget,
     QVBoxLayout,
     QWidget,
 )
@@ -115,7 +116,9 @@ QProgressBar::chunk { background: #87d7b7;
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, *, detector_factory=None, initial_model=None):
+    def __init__(
+        self, *, detector_factory=None, initial_model=None, watermark_preset_store_factory=None
+    ):
         super().__init__()
         ensure_gui_collection()
         self.detector_factory = detector_factory
@@ -153,6 +156,13 @@ class MainWindow(QMainWindow):
         muted.setObjectName("muted")
         header.addWidget(muted)
         root.addLayout(header)
+        self.tabs = QTabWidget()
+        root.addWidget(self.tabs, 1)
+        framing_page = QWidget()
+        framing_root = QVBoxLayout(framing_page)
+        framing_root.setContentsMargins(0, 0, 0, 0)
+        self.tabs.addTab(framing_page, "Encuadre")
+        root = framing_root
         self.paths_panel = QWidget()
         paths = QGridLayout(self.paths_panel)
         paths.setContentsMargins(0, 0, 0, 0)
@@ -419,6 +429,12 @@ class MainWindow(QMainWindow):
         self.output_edit.textChanged.connect(self.invalidate)
         self.review_filter.currentIndexChanged.connect(self.apply_review_filter)
         self.update_controls()
+        from raceframe.ui.watermark_page import WatermarkPage
+
+        self.watermark_page = WatermarkPage(
+            self, preset_store_factory=watermark_preset_store_factory
+        )
+        self.tabs.addTab(self.watermark_page, "Marcas de agua")
 
     @staticmethod
     def combo(options):
@@ -898,9 +914,14 @@ class MainWindow(QMainWindow):
             )
 
     def closeEvent(self, event):
-        if self.worker is not None:
+        page_worker = getattr(getattr(self, "watermark_page", None), "worker", None)
+        if self.worker is not None or page_worker is not None:
             self.close_when_finished = True
-            self.cancel_work()
+            if self.worker is not None:
+                self.cancel_work()
+            if page_worker is not None:
+                self.watermark_page.close_when_finished = True
+                self.watermark_page.cancel_work()
             event.ignore()
         else:
             event.accept()

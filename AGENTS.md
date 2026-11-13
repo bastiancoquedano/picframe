@@ -10,7 +10,7 @@
 - El propietario autorizó usar https://github.com/bastiancoquedano/picframe para subir cambios.
 - Publicar solo código/documentación revisados, sin fotos privadas, pesos, credenciales ni entornos.
 - La aprobación de avance ya fue recibida; no volver a pedirla para redactar la especificación.
-- Funcionalidad activa: `specs/003-general-subjects/`; leer spec.md y plan.md antes de generar tareas.
+- Funcionalidades implementadas en `specs/001` a `specs/003`; activar Smart Watermark en `specs/004-smart-watermark/`.
 - No implementar motor, interfaz ni funcionalidades antes de completar las etapas aprobadas.
 - La idea fuente está en `docs/idea-original.md`; conservarla como referencia histórica.
 - CLI implementado: detección local, selección, modos, exportación, diario, cancelación y reportes.
@@ -19,7 +19,7 @@
 - Entorno completo: uv sync --locked --extra detector. Usar --no-sync al ejecutar para conservar el extra.
 - Pesos en models/ excluidos de Git; configuración de desarrollo en .runtime/ también excluida.
 - No modificar fotografías originales ni incorporar fotografías privadas al repositorio.
-- No descargar pesos ni instalar dependencias de visión hasta evaluar su versión y licencias.
+- No descargar pesos de segmentación ni instalarlos automáticamente. La versión/licencia de PyObjC Vision 13.0 fue evaluada; mantenerla opcional en `watermark-vision`.
 - Registrar resultados verificables. No presentar un entorno configurado como un MVP validado.
 
 - Metadatos obligatorios: usar ExifTool y verificar antes de publicar recortes; no degradar a advertencia.
@@ -30,9 +30,9 @@
 - El propietario pidió continuar a interfaz tras la muestra; no excluir personas por espalda.
 - Mantener T042/T043 del CLI pendientes; aprobación de avanzar no equivale a completar esas mediciones.
 
-- Interfaz Picframe 0.3.1 y bundle local en dist/Picframe.app; abrir con Finder.
+- Interfaz Picframe 0.4.0 y bundle local en dist/Picframe.app; abrir con Finder.
 - Seguir specs/002-desktop-interface/ y docs/desktop.md. No clasificar por espalda. Grupos explícitos autorizados en specs/003-general-subjects/.
-- Entorno completo: uv sync --locked --extra detector --extra gui --extra build.
+- Entorno de build: uv sync --locked --extra detector --extra gui --extra build --extra watermark-vision.
 - Pruebas UI con QT_QPA_PLATFORM=offscreen; reales requieren RACEFRAME_TEST_MODEL.
 - No publicar bundle, herramientas, pesos, fotos o logs privados. La .app tiene firma ad hoc, sin notarización.
 
@@ -40,3 +40,5 @@
 - Sujetos generales y grupo explícito reemplazan las restricciones previas de solo personas/grupos desactivados.
 
 - Automático inicia con personas, animales y vehículos. Casillas combinables al desactivarlo; no selector exclusivo.
+
+- El propietario aprobó specs/004-smart-watermark el 2026-11-12 y eligió fallback Tradicional con marca visible y revisión. Implementación, build y smoke offline completados; sigue pendiente evaluación visual con fotos reales del propietario.

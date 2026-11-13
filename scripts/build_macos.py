@@ -10,6 +10,15 @@ def main():
     if sys.platform != "darwin":
         raise SystemExit("La app macOS se construye en macOS")
     root = Path(__file__).resolve().parents[1]
+    try:
+        import objc  # noqa: F401
+        import Quartz  # noqa: F401
+        import Vision  # noqa: F401
+    except ImportError as exc:
+        raise SystemExit(
+            "Instala la integración local con: uv sync --locked --extra detector --extra gui "
+            "--extra build --extra watermark-vision"
+        ) from exc
     for path in (root / "models/yolo11n.pt", root / ".runtime/exiftool/exiftool"):
         if not path.is_file():
             raise SystemExit(f"Falta recurso preparado: {path.name}")
@@ -46,7 +55,15 @@ def main():
         print(log.read_text()[-9000:])
         raise SystemExit(result.returncode)
     resources = root / "dist/Picframe.app/Contents/Resources"
-    for package in ("ultralytics", "torch", "torchvision", "opencv_python", "numpy", "pillow"):
+    for package in (
+        "ultralytics",
+        "torch",
+        "torchvision",
+        "opencv_python",
+        "numpy",
+        "pillow",
+        "pyobjc_framework_vision",
+    ):
         if not list(resources.glob(package + "-*.dist-info")):
             raise SystemExit("Faltan metadatos de dependencia en el bundle: " + package)
     print(root / "dist/Picframe.app")

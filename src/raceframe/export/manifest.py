@@ -48,8 +48,12 @@ def summarize(rows, elapsed):
     for row in rows:
         key = "errors" if row["operation_status"] == "error" else row["operation_status"]
         result[key] += 1
+        if key != "errors" and row.get("error"):
+            result["errors"] += 1
         if row["composition"] is not None:
             result[row["composition"]["status"]] += 1
+        if row.get("watermark", {}).get("review_required"):
+            result["review_required"] += 1
     return result
 
 

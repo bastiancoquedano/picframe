@@ -9,8 +9,17 @@ import os
 os.environ["YOLO_OFFLINE"] = "true"
 os.environ["YOLO_AUTOINSTALL"] = "false"
 hidden = collect_submodules("ultralytics")
+hidden += ["Vision", "Quartz", "objc", "Cocoa", "Foundation", "CoreML"]
 package_metadata = []
-for package in ("ultralytics", "torch", "torchvision", "opencv-python", "numpy", "pillow"):
+for package in (
+    "ultralytics",
+    "torch",
+    "torchvision",
+    "opencv-python",
+    "numpy",
+    "pillow",
+    "pyobjc-framework-Vision",
+):
     package_metadata += copy_metadata(package)
 a = Analysis(
     [str(project / "scripts/desktop_entry.py")],
@@ -62,7 +71,7 @@ app = BUNDLE(
     info_plist={
         "CFBundleName": "Picframe",
         "CFBundleDisplayName": "Picframe",
-        "CFBundleShortVersionString": "0.3.2",
+        "CFBundleShortVersionString": "0.4.0",
         "NSHighResolutionCapable": True,
     },
 )

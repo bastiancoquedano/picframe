@@ -6,10 +6,14 @@ exporta a una carpeta independiente, sin modificar originales.
 
 ## Estado actual
 
-**Picframe 0.3.2 ya tiene interfaz de escritorio**, además del CLI.
+**Picframe 0.4.0 ya tiene interfaz de escritorio**, además del CLI.
 La aplicación local está en `dist/Picframe.app`: abrir con doble clic en Finder.
 Permite elegir carpetas, analizar en segundo plano, comparar original/recorte, seleccionar
 otro sujeto, dibujar un recorte seguro y exportar con los metadatos verificados.
+
+La pestaña **Marcas de agua** añade composición PNG tradicional y Smart Watermark con
+segmentación local de personas, identificación de texto/PNG, presets locales y revisión por
+foto cuando Vision no produce una máscara confiable. Consulta [la guía de marcas de agua](docs/watermarks.md).
 
 [Guía de escritorio](docs/desktop.md) · [validación](docs/desktop-validation.md)
 
@@ -34,7 +38,7 @@ Los comandos siguientes son referencias reproducibles para el agente.
 Python 3.11.16 y uv. El Mac de desarrollo ya tiene dependencias y pesos preparados.
 
 ```sh
-uv sync --locked --extra detector --extra gui
+uv sync --locked --extra detector --extra gui --extra watermark-vision
 uv run --no-sync python scripts/prepare_model.py
 uv run --no-sync python scripts/prepare_metadata_tool.py
 uv run --no-sync picframe --version
@@ -42,7 +46,7 @@ uv run --no-sync picframe --version
 
 La preparación descarga dependencias/pesos explícitamente. El procesamiento posterior no usa
 servicios externos ni descarga pesos. Véase [modelos](docs/modelos.md) y [dependencias](docs/dependencias.md).
-La GUI es un extra opcional para el CLI. La suite completa de desarrollo requiere `--extra gui`
+La GUI y Apple Vision son extras opcionales para el CLI. La suite completa de desarrollo requiere `--extra gui`
 porque ahora incluye pruebas de widgets; el núcleo geométrico sigue sin importar Qt.
 
 ## Procesamiento

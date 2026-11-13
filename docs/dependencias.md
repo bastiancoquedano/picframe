@@ -1,12 +1,13 @@
-# Dependencias efectivas — 2026-11-01
+# Dependencias efectivas — 2026-11-12
 
 Python 3.11.16, macOS arm64. Instalación comprobada con `uv sync --locked --extra detector`.
 Dependencias principales: Ultralytics 8.4.197, OpenCV 4.13.0.92, torch 2.15.0,
 torchvision 0.29.2, NumPy 2.4.6 y Pillow 13.0.0. Hay una sola distribución cv2.
 La combinación pasó inferencia CPU, prueba offline y preparación MPS en este Mac.
 
-El extra `detector` incorpora YOLO/torch/OpenCV. Sin ese extra se pueden ejecutar las pruebas
-con detector simulado y la geometría. Qt/PySide6 no está incorporado en este prototipo CLI.
+El extra `detector` incorpora YOLO/torch/OpenCV; `gui` incorpora PySide6 Essentials y
+`watermark-vision` incorpora Apple Vision vía PyObjC solo en macOS. Sin los extras se pueden
+ejecutar el CLI y las pruebas de geometría; las pruebas de widgets requieren `gui`.
 Hatchling es una dependencia de construcción; las dependencias efectivas se fijan en uv.lock.
 
 Inventario extraído de los metadatos instalados, incluyendo desarrollo y transitivas:
@@ -46,6 +47,11 @@ Inventario extraído de los metadatos instalados, incluyendo desarrollo y transi
 | psutil | 7.2.2 | BSD-3-Clause |
 | Pygments | 2.21.0 | BSD-2-Clause |
 | pyparsing | 3.3.3 | MIT |
+| pyobjc-core | 13.0 | MIT |
+| pyobjc-framework-Cocoa | 13.0 | MIT |
+| pyobjc-framework-CoreML | 13.0 | MIT |
+| pyobjc-framework-Quartz | 13.0 | MIT |
+| pyobjc-framework-Vision | 13.0 | MIT |
 | pytest | 9.2.0 | MIT |
 | python-dateutil | 4.0.0 | BSD-3-Clause |
 | referencing | 0.37.0 | MIT |
@@ -74,6 +80,16 @@ Fuentes primarias:
 - [OpenCV](https://pypi.org/project/opencv-python/4.13.0.92/).
 - [PyTorch](https://pypi.org/project/torch/2.15.0/).
 - [Pillow](https://pypi.org/project/pillow/13.0.0/).
+
+## Apple Vision y PyObjC
+
+La aplicación 0.4.0 incorpora `pyobjc-framework-Vision==13.0` como extra macOS opcional;
+sus dependencias fijadas incluyen pyobjc-core, Cocoa, CoreML y Quartz 13.0. El adaptador se ejecuta
+localmente y no descarga modelos. La licencia MIT es la declarada por las distribuciones instaladas;
+no constituye una evaluación legal de una distribución de Picframe.
+
+Fuentes: [PyPI Vision 13.0](https://pypi.org/project/pyobjc-framework-Vision/13.0/),
+[Apple Vision segmentation](https://developer.apple.com/documentation/vision/vngeneratepersonsegmentationrequest).
 
 ## Conservación estricta de metadatos
 

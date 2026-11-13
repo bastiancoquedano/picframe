@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "picframe"
-version = "0.3.2"
+version = "0.4.0"
 description = "Reencuadre fotográfico local de personas, animales y vehículos para macOS"
 readme = "README.md"
 requires-python = ">=3.11,<3.12"
@@ -37,13 +37,17 @@ gui = [
 build = [
     "pyinstaller==6.22.3",
 ]
+watermark-vision = [
+    "numpy==2.4.6; sys_platform == 'darwin'",
+    "pyobjc-framework-Vision==13.0; sys_platform == 'darwin'",
+]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/raceframe"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-markers = ["real_model: requiere pesos locales y dependencias del detector"]
+markers = ["real_model: requiere pesos locales y dependencias del detector", "real_vision: requiere PyObjC Vision y macOS"]
 pythonpath = ["src"]
 qt_api = "pyside6"
 

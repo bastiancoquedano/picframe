@@ -13,9 +13,12 @@ def run_smoke(report_path):
     from raceframe.core.detection import YoloDetector
     from raceframe.core.models import Box, Detection
     from raceframe.core.processing import analyze_image, process_folder
+    from raceframe.core.watermark_models import WatermarkConfig, WatermarkLayer
+    from raceframe.core.watermark_processing import process_watermark_folder
     from raceframe.imaging.discovery import discover
     from raceframe.ui.resources import model_path
     from raceframe.ui.window import MainWindow
+    from raceframe.watermark.vision import VisionPersonSegmenter
 
     app = QApplication.instance() or QApplication([])
     with tempfile.TemporaryDirectory(prefix="raceframe-bundle-") as name:
@@ -158,6 +161,21 @@ def run_smoke(report_path):
                     in scenario_result["images"][0]["warnings"],
                 }
             )
+        watermark_logo = root / "watermark-logo.png"
+        Image.new("RGBA", (48, 32), (255, 255, 255, 180)).save(watermark_logo)
+        if not VisionPersonSegmenter.available():
+            raise RuntimeError("El bundle no incluye PyObjC Vision")
+        watermark_result = process_watermark_folder(
+            source,
+            root / "watermark-out",
+            config=WatermarkConfig(
+                mode="smart",
+                layers=(WatermarkLayer(watermark_logo),),
+                fallback_policy="copy_original",
+            ),
+        )
+        if watermark_result["summary"]["exported"] != 1:
+            raise RuntimeError("Falló el lote Smart Watermark del bundle")
         window = MainWindow()
         if not window.auto_subjects.isChecked() or window.current_config().active_categories != (
             "people",
@@ -165,6 +183,8 @@ def run_smoke(report_path):
             "vehicles",
         ):
             raise RuntimeError("Automático no está activo inicialmente en el bundle")
+        if window.tabs.count() != 2 or window.watermark_page is None:
+            raise RuntimeError("La pestaña de marcas de agua no está en el bundle")
         window.review_filter.setCurrentIndex(1)
         window.on_record(row)
         window.apply_review_filter()
@@ -179,6 +199,17 @@ def run_smoke(report_path):
         record = {
             "bundle": True,
             "qt_window_created": True,
+            "watermark_tab_created": True,
+            "watermark_vision_available": True,
+            "watermark_status": watermark_result["images"][0]["watermark"]["segmentation_status"],
+            "watermark_review_required": watermark_result["images"][0]["watermark"][
+                "review_required"
+            ],
+            "watermark_fallback_applied": watermark_result["images"][0]["watermark"][
+                "fallback_applied"
+            ],
+            "watermark_metadata_verified": "metadata_verified"
+            in watermark_result["images"][0]["warnings"],
             "review_filter_verified": True,
             "real_inference_cpu": True,
             "real_categories": real_categories,

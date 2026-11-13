@@ -1,4 +1,4 @@
-# Picframe de escritorio — 0.3.2
+# Picframe de escritorio — 0.4.0
 
 ## Abrir en este Mac
 
@@ -37,7 +37,7 @@ se copian sin cambios mientras no se resuelva su selección.
 Comandos de referencia para el agente, no requeridos para el fotógrafo:
 
 ```sh
-uv sync --locked --extra detector --extra gui --extra build
+uv sync --locked --extra detector --extra gui --extra build --extra watermark-vision
 uv run --no-sync python scripts/prepare_model.py
 uv run --no-sync python scripts/prepare_metadata_tool.py
 uv run --no-sync picframe-gui
@@ -46,6 +46,8 @@ uv run --no-sync python scripts/build_macos.py
 
 Qt Widgets usa PySide6 Essentials 6.12.0; no incorpora WebEngine/PDF innecesarios.
 Build con PyInstaller 6.22.3, arm64/onedir/windowed, pesos locales, ExifTool y su lib.
+Apple Vision se congela junto con sus bindings PyObjC. La solicitud Vision y el fallback del lote
+se prueban con datos sintéticos antes de copiar la app.
 El hook propio recoge _C_stable.so/image_stable.so de torchvision 0.29.2; los hooks anteriores
 solo reconocían el nombre nativo antiguo. Se incorporan metadatos de dependencias para auditoría.
 
@@ -65,6 +67,7 @@ El diagnóstico del bundle ejecutado bajo deny network* verificó inferencia CPU
 con metadata_verified. La apertura nativa se observó en Raceframe 0.2.0; los incrementos
 Picframe incluyen regresión Qt offscreen, captura sintética y diagnóstico del bundle.
 La muestra pequeña no completa las tareas fotográficas y de volumen del CLI.
+La validación específica de Smart Watermark 0.4.0 está en [smart-watermark-validation.md](smart-watermark-validation.md).
 
 ## Categoría y selección
 
@@ -110,3 +113,21 @@ y queda anotado `already_well_framed`; no se altera calidad ni metadatos.
 La regla se usa con proporción Original. Si elegiste otra proporción o el modo Cerrado, se
 respeta esa decisión. Elegir otra persona o dibujar un recorte manual también permite corregirlo.
 La geometría estima equilibrio; no interpreta intención artística ni reemplaza la revisión visual.
+
+## Marcas de agua
+
+Abre la pestaña **Marcas de agua**. Elige origen, destino y nombre del trabajo; selecciona uno o más
+PNG transparentes y pulsa **Previsualizar primera foto** antes de aplicar a la carpeta. Tradicional
+permite varios PNG y patrón repetido. Smart usa un único PNG principal para ocultarlo con la máscara
+local de personas. La firma final puede ser texto o PNG, y queda sobre las marcas.
+
+Si Smart no obtiene una máscara confiable, por defecto pone la marca delante de la persona y marca
+esa foto **Para revisar**; el lote continúa. En **Si Smart requiere fallback** también puedes copiar el
+JPEG original sin cambio alguno y marcarlo para revisión, u omitir la foto y registrar el error.
+Una máscara vacía válida se interpreta como “sin personas detectadas” y no activa el fallback.
+
+Los presets guardan configuración, rutas y hashes de PNG en Application Support local; deben conservarse
+los PNG originales en las rutas guardadas. La exportación mantiene el tamaño del marco, orienta según
+EXIF y verifica EXIF, ICC y demás metadatos antes de publicar. La imagen se recodifica como JPEG salvo
+el fallback de copia exacta. Smart solo segmenta personas; no oculta la marca detrás de animales,
+vehículos u otros objetos. Revisa el resultado real con tus fotos antes de usarlo como marca final.
