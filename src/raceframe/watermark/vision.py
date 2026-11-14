@@ -126,7 +126,7 @@ class VisionPersonSegmenter:
             if cg_image is None:
                 raise RuntimeError("No se pudo crear el buffer orientado para Apple Vision")
             request_handler = Vision.VNImageRequestHandler.alloc().initWithCGImage_options_(
-                cg_image, {}
+                cg_image, None
             )
             request = Vision.VNGeneratePersonSegmentationRequest.alloc().initWithCompletionHandler_(
                 None

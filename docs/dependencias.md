@@ -83,7 +83,7 @@ Fuentes primarias:
 
 ## Apple Vision y PyObjC
 
-La aplicación 0.4.0 incorpora `pyobjc-framework-Vision==13.0` como extra macOS opcional;
+La aplicación 0.4.1 incorpora `pyobjc-framework-Vision==13.0` como extra macOS opcional;
 sus dependencias fijadas incluyen pyobjc-core, Cocoa, CoreML y Quartz 13.0. El adaptador se ejecuta
 localmente y no descarga modelos. La licencia MIT es la declarada por las distribuciones instaladas;
 no constituye una evaluación legal de una distribución de Picframe.

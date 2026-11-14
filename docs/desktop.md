@@ -1,4 +1,4 @@
-# Picframe de escritorio — 0.4.0
+# Picframe de escritorio — 0.4.1
 
 ## Abrir en este Mac
 
@@ -67,7 +67,7 @@ El diagnóstico del bundle ejecutado bajo deny network* verificó inferencia CPU
 con metadata_verified. La apertura nativa se observó en Raceframe 0.2.0; los incrementos
 Picframe incluyen regresión Qt offscreen, captura sintética y diagnóstico del bundle.
 La muestra pequeña no completa las tareas fotográficas y de volumen del CLI.
-La validación específica de Smart Watermark 0.4.0 está en [smart-watermark-validation.md](smart-watermark-validation.md).
+La validación específica de Smart Watermark 0.4.1 está en [smart-watermark-validation.md](smart-watermark-validation.md).
 
 ## Categoría y selección
 

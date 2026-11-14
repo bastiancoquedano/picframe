@@ -30,7 +30,7 @@
 - El propietario pidió continuar a interfaz tras la muestra; no excluir personas por espalda.
 - Mantener T042/T043 del CLI pendientes; aprobación de avanzar no equivale a completar esas mediciones.
 
-- Interfaz Picframe 0.4.0 y bundle local en dist/Picframe.app; abrir con Finder.
+- Interfaz Picframe 0.4.1 y bundle local en dist/Picframe.app; abrir con Finder.
 - Seguir specs/002-desktop-interface/ y docs/desktop.md. No clasificar por espalda. Grupos explícitos autorizados en specs/003-general-subjects/.
 - Entorno de build: uv sync --locked --extra detector --extra gui --extra build --extra watermark-vision.
 - Pruebas UI con QT_QPA_PLATFORM=offscreen; reales requieren RACEFRAME_TEST_MODEL.

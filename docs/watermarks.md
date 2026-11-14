@@ -1,4 +1,4 @@
-# Marcas de agua en Picframe 0.4.0
+# Marcas de agua en Picframe 0.4.1
 
 La pestaña **Marcas de agua** aplica marcas a JPEG completos sin recortarlos. Los originales se abren
 solo para lectura. Cada lote crea una carpeta de trabajo con manifiesto, diario y salidas exclusivas;

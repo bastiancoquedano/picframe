@@ -6,7 +6,7 @@ exporta a una carpeta independiente, sin modificar originales.
 
 ## Estado actual
 
-**Picframe 0.4.0 ya tiene interfaz de escritorio**, además del CLI.
+**Picframe 0.4.1 ya tiene interfaz de escritorio**, además del CLI.
 La aplicación local está en `dist/Picframe.app`: abrir con doble clic en Finder.
 Permite elegir carpetas, analizar en segundo plano, comparar original/recorte, seleccionar
 otro sujeto, dibujar un recorte seguro y exportar con los metadatos verificados.

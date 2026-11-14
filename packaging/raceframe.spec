@@ -71,7 +71,7 @@ app = BUNDLE(
     info_plist={
         "CFBundleName": "Picframe",
         "CFBundleDisplayName": "Picframe",
-        "CFBundleShortVersionString": "0.4.0",
+        "CFBundleShortVersionString": "0.4.1",
         "NSHighResolutionCapable": True,
     },
 )

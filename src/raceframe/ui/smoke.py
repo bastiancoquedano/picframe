@@ -202,6 +202,7 @@ def run_smoke(report_path):
             "watermark_tab_created": True,
             "watermark_vision_available": True,
             "watermark_status": watermark_result["images"][0]["watermark"]["segmentation_status"],
+            "watermark_reason": watermark_result["images"][0]["watermark"]["segmentation_reason"],
             "watermark_review_required": watermark_result["images"][0]["watermark"][
                 "review_required"
             ],

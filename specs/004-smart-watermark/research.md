@@ -79,3 +79,13 @@ La llamada Vision sintética se ejecutó en T001; T002 confirmó el bundle conge
   import de Vision, inference CPU del detector y exportación de JPEG. Una solicitud Vision sobre la figura
   sintética no obtuvo confianza; `copy_original` dejó bytes idénticos y registró `review_required`.
 - `codesign --verify --deep --strict` pasó. Firma ad hoc local; no Developer ID/notarización.
+
+## Incidencia del primer lote real — 2026-11-14
+
+- El propietario ejecutó Smart en diez JPEG. Todos los registros indicaron
+  `ValueError: NSInvalidArgumentException - key does not exist`, con fallback Traditional y revisión.
+- Reproduje el error con una imagen sintética. La excepción ocurría al crear
+  `VNImageRequestHandler.initWithCGImage_options_` pasando `{}`; el mismo initializer funciona pasando
+  `None`. Cambié el adaptador para dejar las opciones sin configurar. El test local real de Vision
+  vuelve a pasar; el bundle 0.4.1 bajo `deny network*` informa `low_confidence_mask` para la figura, no la
+  excepción de inicialización. CI para este parche queda pendiente.
