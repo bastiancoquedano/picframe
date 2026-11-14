@@ -31,3 +31,4 @@ vacío lanza una excepción. Picframe 0.4.1 pasa `None` (sin opciones). La misma
 vuelve a completar la solicitud: el smoke del bundle bajo `deny network*` devuelve `low_confidence_mask`
 para la figura, en vez de la excepción de inicialización. El fallback de baja confianza de esa figura
 sigue siendo esperado y no acredita precisión con corredores reales.
+- GitHub Actions **Calidad** pasó con el arreglo Vision en [el run de `c517e2d`](https://github.com/bastiancoquedano/picframe/actions/runs/43617006084).

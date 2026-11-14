@@ -61,7 +61,7 @@ description: "Tareas para Smart Watermark"
 - [x] T021 [P] Extender schema de forma aditiva con `job_type=watermark` y campo opcional por fila; validar manifest v1.
 - [x] T022 Actualizar README, guía desktop, dependencias y guía de Watermarks con operación local, límites, fallback y privacidad.
 - [x] T023 Ejecutar ruff, suite completa, 1k sintético, Vision local sintético y `Picframe.app` bajo `deny network*`; guardar evidencia en `docs/smart-watermark-validation.md`.
-- [ ] T024 Confirmar build y firma en macOS 26.6.2; documentar que macOS 12 no se probó en otro equipo; subir solo código/documentación a `picframe`; CI Calidad exitoso y árbol limpio; sin logos, fotos, weights ni presets.
+- [x] T024 Confirmar build y firma en macOS 26.6.2; documentar que macOS 12 no se probó en otro equipo; subir solo código/documentación a `picframe`; CI Calidad exitoso y árbol limpio; sin logos, fotos, weights ni presets.
 
 ## Dependencies & Execution Order
 

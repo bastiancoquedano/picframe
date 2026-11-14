@@ -88,4 +88,5 @@ La llamada Vision sintética se ejecutó en T001; T002 confirmó el bundle conge
   `VNImageRequestHandler.initWithCGImage_options_` pasando `{}`; el mismo initializer funciona pasando
   `None`. Cambié el adaptador para dejar las opciones sin configurar. El test local real de Vision
   vuelve a pasar; el bundle 0.4.1 bajo `deny network*` informa `low_confidence_mask` para la figura, no la
-  excepción de inicialización. CI para este parche queda pendiente.
+  excepción de inicialización. GitHub Actions Calidad pasó para `c517e2d`; el código y el smoke 0.4.1
+  están publicados.
